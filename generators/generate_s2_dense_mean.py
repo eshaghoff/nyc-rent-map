@@ -308,8 +308,8 @@ with open("/tmp/heat_points_s2_dense_mean.js", "w") as f:
         f.write(f"  {{lat:{hp['lat']},lng:{hp['lng']},rent:{hp['rent']},n:{hp['count']}}},\n")
     f.write("];\n")
 
-all_rents = sorted([l["rent"] for l in non_rs])
-nyc_med = all_rents[len(all_rents) // 2]
+all_rents = [l["rent"] for l in non_rs]
+nyc_mean = int(round(sum(all_rents) / len(all_rents)))
 print(f"\nOutput: /tmp/heat_points_s2_dense_mean.js")
-print(f"NYC overall median: ${nyc_med:,}")
+print(f"NYC overall mean: ${nyc_mean:,}")
 print(f"Total listings: {len(non_rs)}")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-S3: Dense grid (0.002°/0.003°), median rent, active + trailing 4 months rented.
+S3: Dense grid (0.002°/0.003°), mean rent, active + trailing 4 months rented.
 Uses rented_raw_v2.json (has rented_date field) + listings_raw.json.
 MIN_CELL_COUNT=2.
 """
@@ -240,12 +240,12 @@ for (clat, clng, gs), lsts in grid_cells.items():
     if len(lsts) < MIN_CELL_COUNT:
         dropped_thin += 1
         continue
-    rents = sorted([l["rent"] for l in lsts])
-    med_rent = rents[len(rents) // 2]
+    rents = [l["rent"] for l in lsts]
+    mean_rent = sum(rents) / len(rents)
     heat_points.append({
         "lat": round(clat, 4),
         "lng": round(clng, 4),
-        "rent": int(med_rent),
+        "rent": int(round(mean_rent)),
         "count": len(lsts),
     })
 
@@ -309,8 +309,8 @@ with open("/tmp/heat_points_s3_6month.js", "w") as f:
         f.write(f"  {{lat:{hp['lat']},lng:{hp['lng']},rent:{hp['rent']},n:{hp['count']}}},\n")
     f.write("];\n")
 
-all_rents = sorted([l["rent"] for l in non_rs])
-nyc_med = all_rents[len(all_rents) // 2]
+all_rents = [l["rent"] for l in non_rs]
+nyc_mean = int(round(sum(all_rents) / len(all_rents)))
 print(f"\nOutput: /tmp/heat_points_s3_6month.js")
-print(f"NYC overall median: ${nyc_med:,}")
+print(f"NYC overall mean: ${nyc_mean:,}")
 print(f"Total listings: {len(non_rs)}")

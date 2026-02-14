@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Baseline: Dense grid (0.002°/0.003°), median rent, MIN_CELL_COUNT=2
+Baseline: Dense grid (0.002°/0.003°), mean rent, MIN_CELL_COUNT=2
 Trailing 4 months of rented listings + active listings (if available).
 """
 
@@ -289,18 +289,13 @@ borough_listings = defaultdict(list)
 for l in non_rs:
     borough_listings[l["borough"]].append(l)
 
-print(f"\nRegion medians:")
-borough_medians = {}
+print(f"\nRegion means:")
+borough_means = {}
 for borough, lsts in sorted(borough_listings.items()):
     rents = [l["rent"] for l in lsts]
-    if len(rents) >= 1000:
-        sorted_rents = sorted(rents)
-        n = len(sorted_rents)
-        med = sorted_rents[n // 2]
-    else:
-        med = median(rents)
-    borough_medians[borough] = med
-    print(f"  {borough}: ${med:,.0f} (n={len(rents)})")
+    avg = int(round(sum(rents) / len(rents)))
+    borough_means[borough] = avg
+    print(f"  {borough}: ${avg:,.0f} (n={len(rents)})")
 
 # ─── Step 6: Dense adaptive grid heat points ────────────────────────────
 def get_grid_size(lat, lng):
@@ -329,12 +324,12 @@ for (clat, clng, gs), lsts in grid_cells.items():
     if len(lsts) < MIN_CELL_COUNT:
         dropped_thin += 1
         continue
-    rents = sorted([l["rent"] for l in lsts])
-    med_rent = rents[len(rents) // 2]
+    rents = [l["rent"] for l in lsts]
+    mean_rent = sum(rents) / len(rents)
     heat_points.append({
         "lat": round(clat, 4),
         "lng": round(clng, 4),
-        "rent": int(med_rent),
+        "rent": int(round(mean_rent)),
         "count": len(lsts),
     })
 
@@ -405,9 +400,9 @@ with open("/tmp/heat_points_baseline_v2.js", "w") as f:
 print(f"\nOutput: /tmp/heat_points_baseline_v2.js")
 
 # ─── Summary ─────────────────────────────────────────────────────────────
-all_rents = sorted([l["rent"] for l in non_rs])
-nyc_med = all_rents[len(all_rents) // 2]
-print(f"\nNYC overall median: ${nyc_med:,}")
+all_rents = [l["rent"] for l in non_rs]
+nyc_mean = int(round(sum(all_rents) / len(all_rents)))
+print(f"\nNYC overall mean: ${nyc_mean:,}")
 print(f"Total listings used: {len(non_rs)}")
 
 # Check Mill Basin area
