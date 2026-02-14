@@ -471,7 +471,7 @@
   <button class="filter-btn" onclick="filterBorough('Upper Manhattan', this)">Upper Manhattan</button>
   <button class="filter-btn" onclick="filterBorough('North Brooklyn', this)">N. Brooklyn</button>
   <button class="filter-btn" onclick="filterBorough('South Brooklyn', this)">S. Brooklyn</button>
-  <button class="filter-btn" onclick="filterBorough('Queens West', this)">Queens W</button>
+  <button class="filter-btn" onclick="filterBorough('W. Queens', this)">W. Queens</button>
   <button class="filter-btn" onclick="filterBorough('Queens', this)">Queens</button>
   <button class="filter-btn" onclick="filterBorough('South Bronx', this)">S. Bronx</button>
   <button class="filter-btn" onclick="filterBorough('Bronx', this)">Bronx</button>
@@ -483,7 +483,7 @@
   <div>Upper Manhattan: <span class="stat-val" id="statUpperManhattan">$2,500</span></div>
   <div>N. Brooklyn: <span class="stat-val" id="statNorthBrooklyn">$3,900</span></div>
   <div>S. Brooklyn: <span class="stat-val" id="statSouthBrooklyn">$2,200</span></div>
-  <div>Queens West: <span class="stat-val" id="statQueensWest">$3,550</span></div>
+  <div>W. Queens: <span class="stat-val" id="statQueensWest">$3,550</span></div>
   <div>Queens: <span class="stat-val" id="statQueens">$2,198</span></div>
   <div>S. Bronx: <span class="stat-val" id="statSouthBronx">$2,888</span></div>
   <div>Bronx: <span class="stat-val" id="statBronx">$2,169</span></div>
@@ -522,7 +522,7 @@
 // ============================================================
 
 const NEIGHBORHOODS = [
-  {name:"Astoria",lat:40.7687,lng:-73.9282,rent:3163,count:474,borough:"Queens West",crime:"low"},
+  {name:"Astoria",lat:40.7687,lng:-73.9282,rent:3163,count:474,borough:"W. Queens",crime:"low"},
   {name:"Battery Park City",lat:40.7109,lng:-74.0166,rent:4799,count:535,borough:"Lower Manhattan",crime:"low"},
   {name:"Bay Ridge",lat:40.6306,lng:-74.0275,rent:2050,count:190,borough:"South Brooklyn",crime:"low"},
   {name:"Bay Terrace",lat:40.7786,lng:-73.782,rent:2150,count:81,borough:"Queens",crime:"low"},
@@ -555,7 +555,7 @@ const NEIGHBORHOODS = [
   {name:"Crown Heights",lat:40.674,lng:-73.9537,rent:3500,count:462,borough:"North Brooklyn",crime:"low"},
   {name:"Cypress Hills",lat:40.6834,lng:-73.8835,rent:1675,count:83,borough:"South Brooklyn",crime:"low"},
   {name:"DUMBO",lat:40.7024,lng:-73.9879,rent:5235,count:408,borough:"North Brooklyn",crime:"low"},
-  {name:"Ditmars-Steinway",lat:40.7765,lng:-73.9115,rent:2500,count:49,borough:"Queens West",crime:"low"},
+  {name:"Ditmars-Steinway",lat:40.7765,lng:-73.9115,rent:2500,count:49,borough:"W. Queens",crime:"low"},
   {name:"Ditmas Park",lat:40.6374,lng:-73.9611,rent:2300,count:409,borough:"South Brooklyn",crime:"low"},
   {name:"Downtown Brooklyn",lat:40.6928,lng:-73.9841,rent:4450,count:657,borough:"North Brooklyn",crime:"low"},
   {name:"Dyker Heights",lat:40.6234,lng:-74.0149,rent:1600,count:185,borough:"South Brooklyn",crime:"low"},
@@ -598,7 +598,7 @@ const NEIGHBORHOODS = [
   {name:"Hudson Heights",lat:40.8525,lng:-73.9375,rent:2600,count:175,borough:"Upper Manhattan",crime:"low"},
   {name:"Hudson Square",lat:40.7262,lng:-74.0065,rent:7650,count:110,borough:"Lower Manhattan",crime:"low"},
   {name:"Hudson Yards",lat:40.7551,lng:-73.9967,rent:5030,count:185,borough:"Lower Manhattan",crime:"low"},
-  {name:"Hunters Point",lat:40.7469,lng:-73.9456,rent:4220,count:417,borough:"Queens West",crime:"low"},
+  {name:"Hunters Point",lat:40.7469,lng:-73.9456,rent:4220,count:417,borough:"W. Queens",crime:"low"},
   {name:"Inwood",lat:40.8671,lng:-73.9217,rent:2100,count:494,borough:"Upper Manhattan",crime:"low"},
   {name:"Jackson Heights",lat:40.7513,lng:-73.885,rent:2300,count:395,borough:"Queens",crime:"low"},
   {name:"Jamaica",lat:40.7043,lng:-73.8019,rent:2800,count:520,borough:"Queens",crime:"low"},
@@ -616,7 +616,7 @@ const NEIGHBORHOODS = [
   {name:"Lindenwood",lat:40.6645,lng:-73.8554,rent:1900,count:23,borough:"Queens",crime:"low"},
   {name:"Little Italy",lat:40.719,lng:-73.9969,rent:3300,count:361,borough:"Lower Manhattan",crime:"low"},
   {name:"Little Neck",lat:40.7511,lng:-73.737,rent:1695,count:8,borough:"Queens",crime:"low"},
-  {name:"Long Island City",lat:40.752,lng:-73.9355,rent:3800,count:271,borough:"Queens West",crime:"low"},
+  {name:"Long Island City",lat:40.752,lng:-73.9355,rent:3800,count:271,borough:"W. Queens",crime:"low"},
   {name:"Lower East Side",lat:40.7203,lng:-73.9878,rent:4000,count:17,borough:"Lower Manhattan",crime:"low"},
   {name:"Madison",lat:40.6027,lng:-73.9515,rent:2900,count:6,borough:"Lower Manhattan",crime:"low"},
   {name:"Manhattan Valley",lat:40.7988,lng:-73.9638,rent:3250,count:49,borough:"Lower Manhattan",crime:"low"},
@@ -676,7 +676,7 @@ const NEIGHBORHOODS = [
   {name:"Stapleton",lat:40.6294,lng:-74.0761,rent:2050,count:34,borough:"Staten Island",crime:"low"},
   {name:"Stuyvesant Heights",lat:40.6862,lng:-73.9317,rent:2995,count:178,borough:"North Brooklyn",crime:"low"},
   {name:"Stuyvesant Town/PCV",lat:40.7325,lng:-73.9777,rent:4978,count:4,borough:"Lower Manhattan",crime:"low"},
-  {name:"Sunnyside",lat:40.7358,lng:-73.9309,rent:2700,count:36,borough:"Queens West",crime:"low"},
+  {name:"Sunnyside",lat:40.7358,lng:-73.9309,rent:2700,count:36,borough:"W. Queens",crime:"low"},
   {name:"Sunset Park",lat:40.6444,lng:-74.0093,rent:2000,count:305,borough:"South Brooklyn",crime:"low"},
   {name:"Sutton Place",lat:40.7585,lng:-73.9657,rent:4500,count:524,borough:"Lower Manhattan",crime:"low"},
   {name:"The Rockaways",lat:40.5765,lng:-73.8402,rent:2500,count:4,borough:"Queens",crime:"low"},
@@ -701,7 +701,7 @@ const NEIGHBORHOODS = [
   {name:"Windsor Terrace",lat:40.6523,lng:-73.9754,rent:2800,count:311,borough:"North Brooklyn",crime:"low"},
   {name:"Wingate",lat:40.6613,lng:-73.9438,rent:2615,count:86,borough:"South Brooklyn",crime:"low"},
   {name:"Woodhaven",lat:40.6923,lng:-73.858,rent:1750,count:136,borough:"Queens",crime:"low"},
-  {name:"Woodside",lat:40.7431,lng:-73.9044,rent:2978,count:31,borough:"Queens West",crime:"low"},
+  {name:"Woodside",lat:40.7431,lng:-73.9044,rent:2978,count:31,borough:"W. Queens",crime:"low"},
   {name:"Woodstock",lat:40.8204,lng:-73.9125,rent:2624,count:3,borough:"South Bronx",crime:"low"},
   {name:"Yorkville",lat:40.7775,lng:-73.9495,rent:3500,count:616,borough:"Lower Manhattan",crime:"low"},
 ];
@@ -3269,7 +3269,7 @@ let HEAT_POINTS = [
 ];
 
 
-const BOROUGH_NAMES = ["Lower Manhattan","Upper Manhattan","North Brooklyn","South Brooklyn","Queens West","Queens","South Bronx","Bronx","Staten Island"];
+const BOROUGH_NAMES = ["Lower Manhattan","Upper Manhattan","North Brooklyn","South Brooklyn","W. Queens","Queens","South Bronx","Bronx","Staten Island"];
 
 const LISTINGS = [
 [40.7076,-74.0166,5550,0],[40.7111,-74.017,4141,0],[40.7111,-74.017,5149,0],[40.716286,-74.015465,6400,0],[40.716286,-74.015465,6425,0],[40.7111,-74.017,5279,0],[40.7111,-74.017,4907,0],[40.7111,-74.017,4456,0],[40.7111,-74.017,4917,0],[40.7111,-74.017,4887,0],
@@ -5144,7 +5144,7 @@ const BOROUGH_BOUNDS = {
   'Upper Manhattan': { latMin: 40.785, latMax: 40.880, lngMin: -74.020, lngMax: -73.907 },
   'North Brooklyn':  { latMin: 40.660, latMax: 40.740, lngMin: -74.010, lngMax: -73.900 },
   'South Brooklyn':  { latMin: 40.570, latMax: 40.665, lngMin: -74.042, lngMax: -73.860 },
-  'Queens West':     { latMin: 40.730, latMax: 40.790, lngMin: -73.960, lngMax: -73.900 },
+  'W. Queens':     { latMin: 40.730, latMax: 40.790, lngMin: -73.960, lngMax: -73.900 },
   'Queens':          { latMin: 40.540, latMax: 40.812, lngMin: -73.962, lngMax: -73.700 },
   'South Bronx':     { latMin: 40.800, latMax: 40.825, lngMin: -73.933, lngMax: -73.880 },
   'Bronx':           { latMin: 40.820, latMax: 40.917, lngMin: -73.933, lngMax: -73.748 },
@@ -5460,7 +5460,7 @@ function filterBorough(boro, btn) {
     'Upper Manhattan':  [40.8300, -73.9400, 13],
     'North Brooklyn':   [40.6950, -73.9600, 13],
     'South Brooklyn':   [40.6200, -73.9700, 12],
-    'Queens West':      [40.7500, -73.9300, 13],
+    'W. Queens':      [40.7500, -73.9300, 13],
     'Queens':           [40.7280, -73.8600, 12],
     'South Bronx':      [40.8100, -73.9200, 14],
     'Bronx':            [40.8600, -73.8800, 12],

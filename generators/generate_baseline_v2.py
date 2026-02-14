@@ -158,10 +158,10 @@ REGION_MAP = {
     "Tottenville": "Staten Island", "West Brighton": "Staten Island",
     "Westerleigh": "Staten Island", "Willowbrook": "Staten Island",
     "Woodrow": "Staten Island",
-    # Queens West (west of BQE)
-    "Astoria": "Queens West", "Ditmars-Steinway": "Queens West",
-    "Hunters Point": "Queens West", "Long Island City": "Queens West",
-    "Sunnyside": "Queens West", "Woodside": "Queens West",
+    # W. Queens (west of BQE)
+    "Astoria": "W. Queens", "Ditmars-Steinway": "W. Queens",
+    "Hunters Point": "W. Queens", "Long Island City": "W. Queens",
+    "Sunnyside": "W. Queens", "Woodside": "W. Queens",
     # Queens Main (east of BQE)
     "Arverne": "Queens", "Auburndale": "Queens", "Bay Terrace": "Queens",
     "Bayside": "Queens", "Bayswater": "Queens", "Beechhurst": "Queens",
@@ -215,7 +215,7 @@ def get_region(listing):
         return "South Brooklyn"
     # Queens
     if lng > -73.95 and lng < -73.90 and lat > 40.73:
-        return "Queens West"
+        return "W. Queens"
     return "Queens"
 
 for l in cleaned:
