@@ -5187,6 +5187,8 @@ function buildRentLayers(filter) {
       // Round to nice numbers
       rentMin = Math.floor(rentMin / 50) * 50;
       rentMax = Math.ceil(rentMax / 50) * 50;
+      // Cap at global max so legend never exceeds $8,000+
+      if (rentMax > RENT_MAX) rentMax = RENT_MAX;
     }
   }
   activeRentMin = rentMin;
