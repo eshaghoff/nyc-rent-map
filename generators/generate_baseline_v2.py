@@ -1,23 +1,39 @@
 #!/usr/bin/env python3
 """
-New Baseline: Dense grid (0.002°/0.003°), median rent, MIN_CELL_COUNT=2
-Fixes Mill Basin ghost points by requiring >= 2 listings per cell
-and relaxing clamping neighbor requirement to >= 1.
+Baseline: Dense grid (0.002°/0.003°), median rent, MIN_CELL_COUNT=2
+Trailing 4 months of rented listings + active listings (if available).
 """
 
 import json
 import math
+import os
 from collections import defaultdict, Counter
 from statistics import median
+from datetime import datetime, timedelta
 
-# ─── Load data ───────────────────────────────────────────────────────────
-with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/listings_raw.json") as f:
-    listings = json.load(f)
-with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/rented_raw.json") as f:
-    rented = json.load(f)
+# ─── Load data (active + trailing 4 months rented) ──────────────────────
+cutoff_date = (datetime.now() - timedelta(days=4 * 30)).date()
+CUTOFF_DATE = cutoff_date.strftime("%Y-%m-%d")
 
-all_raw = listings + rented
-print(f"Raw listings loaded: {len(listings)} active + {len(rented)} rented = {len(all_raw)} total")
+with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/rented_raw_v2.json") as f:
+    rented_v2 = json.load(f)
+
+rented_recent = [r for r in rented_v2 if r.get("rented_date", "") >= CUTOFF_DATE]
+
+# Load active listings if available
+listings_path = "/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/listings_raw.json"
+listings = []
+if os.path.exists(listings_path):
+    with open(listings_path) as f:
+        listings = json.load(f)
+
+all_raw = listings + rented_recent
+
+if listings:
+    print(f"Raw listings loaded: {len(listings)} active + {len(rented_recent)} rented (4mo) = {len(all_raw)} total")
+else:
+    print(f"Raw listings loaded: {len(rented_recent)} rented (4mo, no active listings available)")
+print(f"Date range for subtitle: {datetime.now().strftime('%b %Y')}")
 
 # ─── Step 1: Filter to 1BR only ─────────────────────────────────────────
 one_br = [l for l in all_raw if l.get("beds") == 1]

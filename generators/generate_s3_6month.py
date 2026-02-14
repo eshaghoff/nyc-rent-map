@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-S3: Dense grid (0.002°/0.003°), median rent, ONLY rented from past 6 months
-Uses rented_raw_v2.json (has rented_date field) instead of rented_raw.json
-Combined with active listings.
+S3: Dense grid (0.002°/0.003°), median rent, active + trailing 4 months rented.
+Uses rented_raw_v2.json (has rented_date field) + listings_raw.json.
 MIN_CELL_COUNT=2.
 """
 
@@ -10,21 +9,30 @@ import json
 import math
 from collections import defaultdict, Counter
 from statistics import median
+from datetime import datetime, timedelta
 
-# ─── Load data ───────────────────────────────────────────────────────────
-with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/listings_raw.json") as f:
-    listings = json.load(f)
-# Use v2 rented data which has rented_date field
+# ─── Load data (active + trailing 4 months rented) ──────────────────────
+import os
+cutoff_date = (datetime.now() - timedelta(days=4 * 30)).date()
+CUTOFF_DATE = cutoff_date.strftime("%Y-%m-%d")
+
 with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/rented_raw_v2.json") as f:
     rented_v2 = json.load(f)
 
-# Filter to past 6 months (data range is Aug 17 2025 - Feb 14 2026, all ~6 months)
-CUTOFF_DATE = "2025-08-14"
 rented_recent = [r for r in rented_v2 if r.get("rented_date", "") >= CUTOFF_DATE]
-print(f"Rented v2: {len(rented_v2)} total, {len(rented_recent)} since {CUTOFF_DATE}")
+
+listings_path = "/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/listings_raw.json"
+listings = []
+if os.path.exists(listings_path):
+    with open(listings_path) as f:
+        listings = json.load(f)
 
 all_raw = listings + rented_recent
-print(f"Raw listings loaded: {len(listings)} active + {len(rented_recent)} rented (6mo) = {len(all_raw)} total")
+
+if listings:
+    print(f"Raw listings loaded: {len(listings)} active + {len(rented_recent)} rented (4mo) = {len(all_raw)} total")
+else:
+    print(f"Raw listings loaded: {len(rented_recent)} rented (4mo, no active listings available)")
 
 one_br = [l for l in all_raw if l.get("beds") == 1]
 print(f"1BR listings: {len(one_br)}")

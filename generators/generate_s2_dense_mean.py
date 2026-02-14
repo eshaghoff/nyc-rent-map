@@ -7,15 +7,30 @@ import json
 import math
 from collections import defaultdict, Counter
 from statistics import median
+from datetime import datetime, timedelta
 
-# ─── Load data ───────────────────────────────────────────────────────────
-with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/listings_raw.json") as f:
-    listings = json.load(f)
-with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/rented_raw.json") as f:
-    rented = json.load(f)
+# ─── Load data (active + trailing 4 months rented) ──────────────────────
+import os
+cutoff_date = (datetime.now() - timedelta(days=4 * 30)).date()
+CUTOFF_DATE = cutoff_date.strftime("%Y-%m-%d")
 
-all_raw = listings + rented
-print(f"Raw listings loaded: {len(listings)} active + {len(rented)} rented = {len(all_raw)} total")
+with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/rented_raw_v2.json") as f:
+    rented_v2 = json.load(f)
+
+rented_recent = [r for r in rented_v2 if r.get("rented_date", "") >= CUTOFF_DATE]
+
+listings_path = "/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/listings_raw.json"
+listings = []
+if os.path.exists(listings_path):
+    with open(listings_path) as f:
+        listings = json.load(f)
+
+all_raw = listings + rented_recent
+
+if listings:
+    print(f"Raw listings loaded: {len(listings)} active + {len(rented_recent)} rented (4mo) = {len(all_raw)} total")
+else:
+    print(f"Raw listings loaded: {len(rented_recent)} rented (4mo, no active listings available)")
 
 one_br = [l for l in all_raw if l.get("beds") == 1]
 print(f"1BR listings: {len(one_br)}")

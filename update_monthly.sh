@@ -7,10 +7,10 @@
 #
 # What it does:
 #   1. Scrapes active listings from StreetEasy (via Playwright)
-#   2. Scrapes recently rented listings (past 6 months)
+#   2. Scrapes recently rented listings (trailing 4 months)
 #   3. Regenerates the baseline heat map (dense grid, median rent)
 #   4. Regenerates scenario S2 (dense grid, mean rent)
-#   5. Regenerates scenario S3 (6-month rented only)
+#   5. Regenerates scenario S3 (active + trailing 4 months rented)
 #   6. Copies fresh data + updates region medians + listing count in HTML
 #   7. Generates a tweet draft with latest stats
 #   8. Commits and pushes to GitHub Pages
@@ -48,9 +48,9 @@ python3 scrape_all.py 2>&1 | tee -a "$LOG_FILE"
 ACTIVE_COUNT=$(python3 -c "import json; d=json.load(open('listings_raw.json')); print(len(d))")
 echo "  Active listings: $ACTIVE_COUNT" | tee -a "$LOG_FILE"
 
-# ─── Step 2: Scrape rented listings ─────────────────────────────────────
+# ─── Step 2: Scrape rented listings (trailing 4 months) ─────────────────
 echo "" | tee -a "$LOG_FILE"
-echo "Step 2/8: Scraping rented listings (past 6 months)..." | tee -a "$LOG_FILE"
+echo "Step 2/8: Scraping rented listings (trailing 4 months)..." | tee -a "$LOG_FILE"
 python3 scrape_rented.py 2>&1 | tee -a "$LOG_FILE"
 
 RENTED_COUNT=$(python3 -c "import json; d=json.load(open('rented_raw_v2.json')); print(len(d))")
@@ -68,9 +68,9 @@ echo "" | tee -a "$LOG_FILE"
 echo "Step 4/8: Generating S2 (mean rent)..." | tee -a "$LOG_FILE"
 python3 "$GENERATOR_DIR/generate_s2_dense_mean.py" 2>&1 | tee -a "$LOG_FILE"
 
-# ─── Step 5: Regenerate S3 (6-month rented) ──────────────────────────────
+# ─── Step 5: Regenerate S3 (active + trailing 4 months rented) ──────────
 echo "" | tee -a "$LOG_FILE"
-echo "Step 5/8: Generating S3 (rented past 6 months)..." | tee -a "$LOG_FILE"
+echo "Step 5/8: Generating S3 (active + rented 4mo)..." | tee -a "$LOG_FILE"
 python3 "$GENERATOR_DIR/generate_s3_6month.py" 2>&1 | tee -a "$LOG_FILE"
 
 # ─── Step 6: Copy data into deployment ───────────────────────────────────
@@ -105,7 +105,7 @@ html_new = re.sub(pattern, new_data.strip(), html, count=1, flags=re.DOTALL)
 # Update the date in the subtitle
 month_year = datetime.datetime.now().strftime("%b %Y")
 html_new = re.sub(
-    r'(Market-Rate 1BR Listings &middot; StreetEasy &middot; )\w+ \d{4}',
+    r'(1BR Listings &middot; StreetEasy &middot; )[^<]+',
     r'\g<1>' + month_year,
     html_new
 )
@@ -115,7 +115,7 @@ total_match = re.search(r'Total listings used: ([\d,]+)', baseline_output)
 if total_match:
     total_str = total_match.group(1)
     html_new = re.sub(
-        r'[\d,]+ Market-Rate 1BR Listings',
+        r'[\d,]+ (?:Market-Rate|Rented) 1BR Listings',
         total_str + ' Market-Rate 1BR Listings',
         html_new
     )
@@ -202,9 +202,11 @@ echo "  Files updated." | tee -a "$LOG_FILE"
 echo "" | tee -a "$LOG_FILE"
 echo "Step 7/8: Generating tweet draft..." | tee -a "$LOG_FILE"
 python3 << 'TWEETEOF'
-import re, os
+import re, os, datetime
 
 output = os.environ.get("BASELINE_OUTPUT", "")
+
+quarter_month = datetime.datetime.now().strftime("%b %Y")
 
 # Parse region medians
 medians = {}
@@ -218,9 +220,6 @@ total_match = re.search(r'Total listings used: ([\d,]+)', output)
 nyc_match = re.search(r'NYC overall median: \$([\d,]+)', output)
 total = total_match.group(1) if total_match else "?"
 nyc_med = nyc_match.group(1) if nyc_match else "?"
-
-import datetime
-quarter_month = datetime.datetime.now().strftime("%b %Y")
 
 draft = f"""# Tweet Thread Draft — NYC Rent Heat Map ({quarter_month})
 
@@ -268,8 +267,7 @@ cd "$DEPLOY_DIR"
 git add index.html heat_points_s2.js heat_points_s3.js tweet_draft.md
 git commit -m "Quarterly data update — $MONTH_YEAR
 
-- $ACTIVE_COUNT active listings
-- $RENTED_COUNT rented listings (6-month lookback)
+- $ACTIVE_COUNT active + $RENTED_COUNT rented listings (trailing 4-month lookback)
 - Fresh heat map data from StreetEasy
 - Auto-generated tweet draft" || echo "No changes to commit"
 git push origin main 2>&1 | tee -a "$LOG_FILE"
