@@ -197,20 +197,12 @@ for l in cleaned:
     rent = l["rent"]
     lat = l["lat"]
     lng = l["lng"]
-    is_rs = False
 
-    # Rule 1: Non-round rents below $2,500 — DHCR legal rent amounts
-    if rent < 2500 and rent % 5 != 0:
-        is_rs = True
-
-    # Rule 2: Below 50% of local spatial median
-    if not is_rs:
-        sm = get_spatial_median(lat, lng)
-        if sm and rent < sm * 0.50:
-            is_rs = True
-
-    if not is_rs:
-        non_rs.append(l)
+    # Single RS rule: Below 60% of local spatial median
+    sm = get_spatial_median(lat, lng)
+    if sm and rent < sm * 0.60:
+        continue
+    non_rs.append(l)
 
 print(f"After RS filter: {len(non_rs)} listings")
 

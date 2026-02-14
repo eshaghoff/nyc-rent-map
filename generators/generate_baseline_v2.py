@@ -57,134 +57,174 @@ print(f"  Bad property type: {removed_bad_type}")
 print(f"  No coordinates: {removed_no_coords}")
 print(f"  Remaining after cleaning: {len(cleaned)}")
 
-# ─── Step 3: Borough assignment ──────────────────────────────────────────
-BOROUGH_MAP = {
-    "Battery Park City": "Manhattan", "Beekman": "Manhattan", "Carnegie Hill": "Manhattan",
-    "Central Harlem": "Manhattan", "Central Park South": "Manhattan", "Chelsea": "Manhattan",
-    "Chinatown": "Manhattan", "Civic Center": "Manhattan", "East Harlem": "Manhattan",
-    "East Village": "Manhattan", "Financial District": "Manhattan", "Flatiron": "Manhattan",
-    "Fort George": "Manhattan", "Fulton/Seaport": "Manhattan", "Gramercy Park": "Manhattan",
-    "Greenwich Village": "Manhattan", "Hamilton Heights": "Manhattan", "Hell's Kitchen": "Manhattan",
-    "Hudson Heights": "Manhattan", "Hudson Square": "Manhattan", "Hudson Yards": "Manhattan",
-    "Inwood": "Manhattan", "Kips Bay": "Manhattan", "Lenox Hill": "Manhattan",
-    "Lincoln Square": "Manhattan", "Little Italy": "Manhattan", "Lower East Side": "Manhattan",
-    "Madison": "Manhattan", "Manhattan Beach": "Brooklyn", "Manhattan Valley": "Manhattan",
-    "Manhattanville": "Manhattan", "Marble Hill": "Manhattan", "Midtown": "Manhattan",
-    "Midtown South": "Manhattan", "Morningside Heights": "Manhattan", "Murray Hill": "Manhattan",
-    "NoMad": "Manhattan", "Noho": "Manhattan", "Nolita": "Manhattan",
-    "Roosevelt Island": "Manhattan", "Soho": "Manhattan", "South Harlem": "Manhattan",
-    "Stuyvesant Town/PCV": "Manhattan", "Sutton Place": "Manhattan", "Tribeca": "Manhattan",
-    "Turtle Bay": "Manhattan", "Two Bridges": "Manhattan", "Upper Carnegie Hill": "Manhattan",
-    "Upper East Side": "Manhattan", "Upper West Side": "Manhattan", "Washington Heights": "Manhattan",
-    "West Chelsea": "Manhattan", "West Harlem": "Manhattan", "West Village": "Manhattan",
-    "Yorkville": "Manhattan",
-    "Bath Beach": "Brooklyn", "Bay Ridge": "Brooklyn", "Bedford-Stuyvesant": "Brooklyn",
-    "Bensonhurst": "Brooklyn", "Bergen Beach": "Brooklyn", "Boerum Hill": "Brooklyn",
-    "Borough Park": "Brooklyn", "Brooklyn Heights": "Brooklyn", "Brownsville": "Brooklyn",
-    "Bushwick": "Brooklyn", "Canarsie": "Brooklyn", "Carroll Gardens": "Brooklyn",
-    "City Line": "Brooklyn", "Clinton Hill": "Brooklyn", "Cobble Hill": "Brooklyn",
-    "Columbia St Waterfront District": "Brooklyn", "Coney Island": "Brooklyn",
-    "Crown Heights": "Brooklyn", "Cypress Hills": "Brooklyn", "DUMBO": "Brooklyn",
-    "Ditmars-Steinway": "Queens",
-    "Ditmas Park": "Brooklyn", "Downtown Brooklyn": "Brooklyn", "Dyker Heights": "Brooklyn",
-    "East Flatbush": "Brooklyn", "East New York": "Brooklyn", "East Williamsburg": "Brooklyn",
-    "Farragut": "Brooklyn", "Fiske Terrace": "Brooklyn", "Flatbush": "Brooklyn",
-    "Flatlands": "Brooklyn", "Fort Greene": "Brooklyn", "Fort Hamilton": "Brooklyn",
-    "Gowanus": "Brooklyn", "Gravesend": "Brooklyn", "Greenpoint": "Brooklyn",
-    "Greenwood": "Brooklyn", "Homecrest": "Brooklyn", "Kensington": "Brooklyn",
-    "Mapleton": "Brooklyn", "Marine Park": "Brooklyn", "Midwood": "Brooklyn",
-    "Mill Basin": "Brooklyn", "New Lots": "Brooklyn", "Ocean Hill": "Brooklyn",
-    "Park Slope": "Brooklyn", "Prospect Heights": "Brooklyn",
-    "Prospect Lefferts Gardens": "Brooklyn", "Prospect Park South": "Brooklyn",
-    "Red Hook": "Brooklyn", "Sheepshead Bay": "Brooklyn", "Starrett City": "Brooklyn",
-    "Stuyvesant Heights": "Brooklyn", "Sunset Park": "Brooklyn", "Vinegar Hill": "Brooklyn",
-    "Weeksville": "Brooklyn", "Williamsburg": "Brooklyn", "Windsor Terrace": "Brooklyn",
-    "Wingate": "Brooklyn",
-    "Arverne": "Queens", "Astoria": "Queens", "Auburndale": "Queens", "Bay Terrace": "Queens",
-    "Bayside": "Queens", "Bayswater": "Queens", "Beechhurst": "Queens", "Briarwood": "Queens",
-    "Brookville": "Queens", "College Point": "Queens", "Corona": "Queens",
-    "Douglaston": "Queens", "East Elmhurst": "Queens", "East Flushing": "Queens",
-    "Elmhurst": "Queens", "Far Rockaway": "Queens", "Flushing": "Queens",
-    "Forest Hills": "Queens", "Fresh Meadows": "Queens", "Glen Oaks": "Queens",
-    "Glendale": "Queens", "Hillcrest": "Queens", "Hollis": "Queens",
-    "Hunters Point": "Queens", "Jackson Heights": "Queens", "Jamaica": "Queens",
-    "Jamaica Estates": "Queens", "Jamaica Hills": "Queens", "Kew Gardens": "Queens",
-    "Kew Gardens Hills": "Queens", "Laurelton": "Queens", "Lindenwood": "Queens",
-    "Little Neck": "Queens", "Long Island City": "Queens", "Malba": "Queens",
-    "Maspeth": "Queens", "Middle Village": "Queens", "North Corona": "Queens",
-    "North New York": "Queens", "Oakland Gardens": "Queens", "Old Howard Beach": "Queens",
-    "Ozone Park": "Queens", "Pomonok": "Queens", "Queens": "Queens",
-    "Queens Village": "Queens", "Rego Park": "Queens", "Richmond Hill": "Queens",
-    "Ridgewood": "Queens", "Rockaway Park": "Queens", "Rockwood Park": "Queens",
-    "Rosedale": "Queens", "South Jamaica": "Queens", "South Ozone Park": "Queens",
-    "Springfield Gardens": "Queens", "St. Albans": "Queens", "Sunnyside": "Queens",
-    "The Rockaways": "Queens", "Whitestone": "Queens", "Woodhaven": "Queens",
-    "Woodside": "Queens",
+# ─── Step 3: Region assignment (9 custom regions) ────────────────────────
+REGION_MAP = {
+    # South Bronx (below 149th St)
+    "Mott Haven": "South Bronx", "Melrose": "South Bronx", "Hunts Point": "South Bronx",
+    "Longwood": "South Bronx", "Morrisania": "South Bronx", "Concourse": "South Bronx",
+    "Highbridge": "South Bronx", "Crotona Park East": "South Bronx", "Woodstock": "South Bronx",
+    # Bronx Main (above 149th St)
     "Bedford Park": "Bronx", "Belmont": "Bronx", "Bronxwood": "Bronx",
-    "City Island": "Bronx", "Claremont": "Bronx", "Concourse": "Bronx",
-    "Country Club": "Bronx", "Crotona Park East": "Bronx", "East Tremont": "Bronx",
-    "Fieldston": "Bronx", "Fordham": "Bronx", "Highbridge": "Bronx",
-    "Hunts Point": "Bronx", "Kingsbridge": "Bronx", "Kingsbridge Heights": "Bronx",
-    "Laconia": "Bronx", "Locust Point": "Bronx", "Longwood": "Bronx",
-    "Melrose": "Bronx", "Morris Heights": "Bronx", "Morris Park": "Bronx",
-    "Morrisania": "Bronx", "Mott Haven": "Bronx", "Mt. Hope": "Bronx",
-    "Norwood": "Bronx", "Parkchester": "Bronx", "Pelham Bay": "Bronx",
-    "Pelham Gardens": "Bronx", "Pelham Parkway": "Bronx", "Riverdale": "Bronx",
-    "Schuylerville": "Bronx", "Soundview": "Bronx", "Spuyten Duyvil": "Bronx",
-    "Throgs Neck": "Bronx", "Tremont": "Bronx", "University Heights": "Bronx",
-    "Van Nest": "Bronx", "Wakefield": "Bronx", "West Farms": "Bronx",
-    "Westchester Square": "Bronx", "Williamsbridge": "Bronx", "Woodstock": "Bronx",
-    "Annadale": "Staten Island", "Arden Heights": "Staten Island", "Arrochar": "Staten Island",
-    "Bulls Head": "Staten Island", "Castleton Corners": "Staten Island", "Clifton": "Staten Island",
-    "Dongan Hills": "Staten Island", "Elm Park": "Staten Island", "Eltingville": "Staten Island",
-    "Emerson Hill": "Staten Island", "Grant City": "Staten Island", "Graniteville": "Staten Island",
-    "Grasmere": "Staten Island", "Great Kills": "Staten Island", "Grymes Hill": "Staten Island",
-    "Huguenot": "Staten Island", "Mariners Harbor": "Staten Island",
-    "Meiers Corners": "Staten Island", "Midland Beach": "Staten Island",
-    "New Brighton": "Staten Island", "New Dorp": "Staten Island",
-    "New Dorp Beach": "Staten Island", "New Springville": "Staten Island",
-    "Oakwood": "Staten Island", "Park Hill": "Staten Island", "Port Richmond": "Staten Island",
-    "Princes Bay": "Staten Island", "Ramblersville": "Queens",
-    "Richmondtown": "Staten Island", "Rosebank": "Staten Island", "Rossville": "Staten Island",
+    "City Island": "Bronx", "Claremont": "Bronx", "Country Club": "Bronx",
+    "East Tremont": "Bronx", "Fieldston": "Bronx", "Fordham": "Bronx",
+    "Kingsbridge": "Bronx", "Kingsbridge Heights": "Bronx", "Laconia": "Bronx",
+    "Locust Point": "Bronx", "Morris Heights": "Bronx", "Morris Park": "Bronx",
+    "Mt. Hope": "Bronx", "Norwood": "Bronx", "Parkchester": "Bronx",
+    "Pelham Bay": "Bronx", "Pelham Gardens": "Bronx", "Pelham Parkway": "Bronx",
+    "Riverdale": "Bronx", "Schuylerville": "Bronx", "Soundview": "Bronx",
+    "Spuyten Duyvil": "Bronx", "Throgs Neck": "Bronx", "Tremont": "Bronx",
+    "University Heights": "Bronx", "Van Nest": "Bronx", "Wakefield": "Bronx",
+    "West Farms": "Bronx", "Westchester Square": "Bronx", "Williamsbridge": "Bronx",
+    # Lower Manhattan (below 96th East / 110th West)
+    "Battery Park City": "Lower Manhattan", "Beekman": "Lower Manhattan",
+    "Carnegie Hill": "Lower Manhattan", "Central Park South": "Lower Manhattan",
+    "Chelsea": "Lower Manhattan", "Chinatown": "Lower Manhattan",
+    "Civic Center": "Lower Manhattan", "East Village": "Lower Manhattan",
+    "Financial District": "Lower Manhattan", "Flatiron": "Lower Manhattan",
+    "Fulton/Seaport": "Lower Manhattan", "Gramercy Park": "Lower Manhattan",
+    "Greenwich Village": "Lower Manhattan", "Hell's Kitchen": "Lower Manhattan",
+    "Hudson Square": "Lower Manhattan", "Hudson Yards": "Lower Manhattan",
+    "Kips Bay": "Lower Manhattan", "Lenox Hill": "Lower Manhattan",
+    "Lincoln Square": "Lower Manhattan", "Little Italy": "Lower Manhattan",
+    "Lower East Side": "Lower Manhattan", "Madison": "Lower Manhattan",
+    "Manhattan Valley": "Lower Manhattan", "Midtown": "Lower Manhattan",
+    "Midtown South": "Lower Manhattan", "Murray Hill": "Lower Manhattan",
+    "NoMad": "Lower Manhattan", "Noho": "Lower Manhattan", "Nolita": "Lower Manhattan",
+    "Roosevelt Island": "Lower Manhattan", "Soho": "Lower Manhattan",
+    "Stuyvesant Town/PCV": "Lower Manhattan", "Sutton Place": "Lower Manhattan",
+    "Tribeca": "Lower Manhattan", "Turtle Bay": "Lower Manhattan",
+    "Two Bridges": "Lower Manhattan", "Upper Carnegie Hill": "Lower Manhattan",
+    "Upper East Side": "Lower Manhattan", "Upper West Side": "Lower Manhattan",
+    "West Chelsea": "Lower Manhattan", "West Village": "Lower Manhattan",
+    "Yorkville": "Lower Manhattan",
+    # Upper Manhattan (Harlem and above)
+    "Central Harlem": "Upper Manhattan", "East Harlem": "Upper Manhattan",
+    "Fort George": "Upper Manhattan", "Hamilton Heights": "Upper Manhattan",
+    "Hudson Heights": "Upper Manhattan", "Inwood": "Upper Manhattan",
+    "Manhattanville": "Upper Manhattan", "Marble Hill": "Upper Manhattan",
+    "Morningside Heights": "Upper Manhattan", "South Harlem": "Upper Manhattan",
+    "Washington Heights": "Upper Manhattan", "West Harlem": "Upper Manhattan",
+    # North Brooklyn (above Empire Blvd / Prospect Expwy)
+    "Bedford-Stuyvesant": "North Brooklyn", "Boerum Hill": "North Brooklyn",
+    "Brooklyn Heights": "North Brooklyn", "Bushwick": "North Brooklyn",
+    "Carroll Gardens": "North Brooklyn", "Clinton Hill": "North Brooklyn",
+    "Cobble Hill": "North Brooklyn", "Columbia St Waterfront District": "North Brooklyn",
+    "Crown Heights": "North Brooklyn", "DUMBO": "North Brooklyn",
+    "Downtown Brooklyn": "North Brooklyn", "East Williamsburg": "North Brooklyn",
+    "Fort Greene": "North Brooklyn", "Gowanus": "North Brooklyn",
+    "Greenpoint": "North Brooklyn", "Ocean Hill": "North Brooklyn",
+    "Park Slope": "North Brooklyn", "Prospect Heights": "North Brooklyn",
+    "Red Hook": "North Brooklyn", "Stuyvesant Heights": "North Brooklyn",
+    "Vinegar Hill": "North Brooklyn", "Weeksville": "North Brooklyn",
+    "Williamsburg": "North Brooklyn", "Windsor Terrace": "North Brooklyn",
+    # South Brooklyn (below Empire Blvd / Prospect Expwy)
+    "Bath Beach": "South Brooklyn", "Bay Ridge": "South Brooklyn",
+    "Bensonhurst": "South Brooklyn", "Bergen Beach": "South Brooklyn",
+    "Borough Park": "South Brooklyn", "Brownsville": "South Brooklyn",
+    "Canarsie": "South Brooklyn", "City Line": "South Brooklyn",
+    "Coney Island": "South Brooklyn", "Cypress Hills": "South Brooklyn",
+    "Ditmas Park": "South Brooklyn", "Dyker Heights": "South Brooklyn",
+    "East Flatbush": "South Brooklyn", "East New York": "South Brooklyn",
+    "Farragut": "South Brooklyn", "Fiske Terrace": "South Brooklyn",
+    "Flatbush": "South Brooklyn", "Flatlands": "South Brooklyn",
+    "Fort Hamilton": "South Brooklyn", "Gravesend": "South Brooklyn",
+    "Greenwood": "South Brooklyn", "Homecrest": "South Brooklyn",
+    "Kensington": "South Brooklyn", "Manhattan Beach": "South Brooklyn",
+    "Mapleton": "South Brooklyn", "Marine Park": "South Brooklyn",
+    "Midwood": "South Brooklyn", "Mill Basin": "South Brooklyn",
+    "New Lots": "South Brooklyn", "Prospect Lefferts Gardens": "South Brooklyn",
+    "Prospect Park South": "South Brooklyn", "Sheepshead Bay": "South Brooklyn",
+    "Starrett City": "South Brooklyn", "Sunset Park": "South Brooklyn",
+    "Wingate": "South Brooklyn",
+    # Staten Island
+    "Annadale": "Staten Island", "Arden Heights": "Staten Island",
+    "Arrochar": "Staten Island", "Bulls Head": "Staten Island",
+    "Castleton Corners": "Staten Island", "Clifton": "Staten Island",
+    "Dongan Hills": "Staten Island", "Elm Park": "Staten Island",
+    "Eltingville": "Staten Island", "Emerson Hill": "Staten Island",
+    "Grant City": "Staten Island", "Graniteville": "Staten Island",
+    "Grasmere": "Staten Island", "Great Kills": "Staten Island",
+    "Grymes Hill": "Staten Island", "Huguenot": "Staten Island",
+    "Mariners Harbor": "Staten Island", "Meiers Corners": "Staten Island",
+    "Midland Beach": "Staten Island", "New Brighton": "Staten Island",
+    "New Dorp": "Staten Island", "New Dorp Beach": "Staten Island",
+    "New Springville": "Staten Island", "Oakwood": "Staten Island",
+    "Park Hill": "Staten Island", "Port Richmond": "Staten Island",
+    "Princes Bay": "Staten Island", "Richmondtown": "Staten Island",
+    "Rosebank": "Staten Island", "Rossville": "Staten Island",
     "Saint George": "Staten Island", "Shore Acres": "Staten Island",
     "Silver Lake": "Staten Island", "South Beach": "Staten Island",
     "Stapleton": "Staten Island", "Tompkinsville": "Staten Island",
     "Tottenville": "Staten Island", "West Brighton": "Staten Island",
     "Westerleigh": "Staten Island", "Willowbrook": "Staten Island",
     "Woodrow": "Staten Island",
+    # Queens West (west of BQE)
+    "Astoria": "Queens West", "Ditmars-Steinway": "Queens West",
+    "Hunters Point": "Queens West", "Long Island City": "Queens West",
+    "Sunnyside": "Queens West", "Woodside": "Queens West",
+    # Queens Main (east of BQE)
+    "Arverne": "Queens", "Auburndale": "Queens", "Bay Terrace": "Queens",
+    "Bayside": "Queens", "Bayswater": "Queens", "Beechhurst": "Queens",
+    "Briarwood": "Queens", "Brookville": "Queens", "College Point": "Queens",
+    "Corona": "Queens", "Douglaston": "Queens", "East Elmhurst": "Queens",
+    "East Flushing": "Queens", "Elmhurst": "Queens", "Far Rockaway": "Queens",
+    "Flushing": "Queens", "Forest Hills": "Queens", "Fresh Meadows": "Queens",
+    "Glen Oaks": "Queens", "Glendale": "Queens", "Hillcrest": "Queens",
+    "Hollis": "Queens", "Jackson Heights": "Queens", "Jamaica": "Queens",
+    "Jamaica Estates": "Queens", "Jamaica Hills": "Queens", "Kew Gardens": "Queens",
+    "Kew Gardens Hills": "Queens", "Laurelton": "Queens", "Lindenwood": "Queens",
+    "Little Neck": "Queens", "Malba": "Queens", "Maspeth": "Queens",
+    "Middle Village": "Queens", "North Corona": "Queens", "North New York": "Queens",
+    "Oakland Gardens": "Queens", "Old Howard Beach": "Queens", "Ozone Park": "Queens",
+    "Pomonok": "Queens", "Queens": "Queens", "Queens Village": "Queens",
+    "Ramblersville": "Queens", "Rego Park": "Queens", "Richmond Hill": "Queens",
+    "Ridgewood": "Queens", "Rockaway Park": "Queens", "Rockwood Park": "Queens",
+    "Rosedale": "Queens", "South Jamaica": "Queens", "South Ozone Park": "Queens",
+    "Springfield Gardens": "Queens", "St. Albans": "Queens",
+    "The Rockaways": "Queens", "Whitestone": "Queens", "Woodhaven": "Queens",
 }
 
-def get_borough(listing):
+def get_region(listing):
     n = listing.get("neighborhood", "")
-    if n in BOROUGH_MAP:
-        return BOROUGH_MAP[n]
+    if n in REGION_MAP:
+        return REGION_MAP[n]
     lat = listing["lat"]
     lng = listing["lng"]
-    if -74.03 < lng < -73.90 and 40.70 < lat < 40.88:
-        if lng > -73.96 or lat < 40.75:
-            return "Manhattan"
+    # Staten Island
     if lat < 40.65 and lng < -74.04:
         return "Staten Island"
-    if lat > 40.80 and lng > -73.94:
+    # Bronx
+    if lat > 40.85 or (lat > 40.80 and lng > -73.94):
+        if lat < 40.818:
+            return "South Bronx"
         return "Bronx"
-    if lat > 40.85:
-        return "Bronx"
-    if lat < 40.74:
-        if lng < -73.92:
-            return "Brooklyn"
-        else:
-            return "Queens"
-    if lng > -73.92:
-        return "Queens"
-    return "Unknown"
+    # Manhattan
+    if -74.03 < lng < -73.90 and 40.70 < lat < 40.88:
+        if lng > -73.96 or lat < 40.75:
+            # East side: 96th St boundary (~40.785)
+            # West side: 110th St boundary (~40.800)
+            if lng > -73.96 and lat >= 40.785:
+                return "Upper Manhattan"
+            if lng <= -73.96 and lat >= 40.800:
+                return "Upper Manhattan"
+            return "Lower Manhattan"
+    # Brooklyn
+    if lat < 40.74 and lng < -73.83:
+        if lat > 40.660:
+            return "North Brooklyn"
+        return "South Brooklyn"
+    # Queens
+    if lng > -73.95 and lng < -73.90 and lat > 40.73:
+        return "Queens West"
+    return "Queens"
 
 for l in cleaned:
-    l["borough"] = get_borough(l)
+    l["borough"] = get_region(l)
 
 unknowns = [l for l in cleaned if l["borough"] == "Unknown"]
 if unknowns:
     unknown_hoods = Counter(l.get("neighborhood", "?") for l in unknowns)
-    print(f"\nUnknown borough listings: {len(unknowns)}")
+    print(f"\nUnknown region listings: {len(unknowns)}")
     for h, c in unknown_hoods.most_common(20):
         sample = next(l for l in unknowns if l.get("neighborhood") == h)
         print(f"  {h}: {c} (lat={sample['lat']}, lng={sample['lng']})")
@@ -208,36 +248,24 @@ def get_spatial_median(lat, lng):
     return spatial_medians.get(key)
 
 rs_flagged = 0
-rs_by_rule = Counter()
 non_rs = []
 for l in cleaned:
     rent = l["rent"]
     lat = l["lat"]
     lng = l["lng"]
     is_rs = False
-    rule = None
 
-    # Rule 1: Non-round rents below $2,500 — these are DHCR legal rent amounts
-    if rent < 2500 and rent % 5 != 0:
+    # Single RS rule: Below 60% of local spatial median
+    sm = get_spatial_median(lat, lng)
+    if sm and rent < sm * 0.60:
         is_rs = True
-        rule = "odd_under_2500"
-
-    # Rule 2: Below 50% of local spatial median — catches RS in any neighborhood
-    if not is_rs:
-        sm = get_spatial_median(lat, lng)
-        if sm and rent < sm * 0.50:
-            is_rs = True
-            rule = "below_50pct_spatial_median"
 
     if is_rs:
         rs_flagged += 1
-        rs_by_rule[rule] += 1
     else:
         non_rs.append(l)
 
-print(f"\nRS filter: flagged {rs_flagged} listings")
-for rule, count in rs_by_rule.most_common():
-    print(f"  {rule}: {count}")
+print(f"\nRS filter: flagged {rs_flagged} listings (below 60% of spatial median)")
 print(f"After RS filter: {len(non_rs)} listings")
 
 # ─── Step 5: Borough medians ────────────────────────────────────────────
@@ -245,7 +273,7 @@ borough_listings = defaultdict(list)
 for l in non_rs:
     borough_listings[l["borough"]].append(l)
 
-print(f"\nBorough medians:")
+print(f"\nRegion medians:")
 borough_medians = {}
 for borough, lsts in sorted(borough_listings.items()):
     rents = [l["rent"] for l in lsts]
