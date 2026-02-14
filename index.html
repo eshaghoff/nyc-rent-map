@@ -403,7 +403,7 @@
 <div class="top-bar">
   <div>
     <div class="logo">NYC RENT <span>HEAT MAP</span></div>
-    <div class="subtitle">41,680 Market-Rate 1BR Listings &middot; StreetEasy &middot; Feb 2026</div>
+    <div class="subtitle">41,623 Market-Rate 1BR Listings &middot; StreetEasy &middot; Feb 2026</div>
   </div>
   <div>
     <div class="legend-bar">
@@ -478,9 +478,9 @@
   <div>Manhattan Median: <span class="stat-val" id="statManhattan">$4,250</span></div>
   <div>Brooklyn Median: <span class="stat-val" id="statBrooklyn">$3,100</span></div>
   <div>Queens Median: <span class="stat-val" id="statQueens">$2,375</span></div>
-  <div>Bronx Median: <span class="stat-val" id="statBronx">$2,825</span></div>
+  <div>Bronx Median: <span class="stat-val" id="statBronx">$2,880</span><span style="font-size:9px;color:var(--text-dim);vertical-align:super" title="Skewed by Mott Haven new construction — traditional Bronx neighborhoods are lower">*</span></div>
   <div>Staten Island Median: <span class="stat-val" id="statStatenIsland">$1,718</span></div>
-  <div>NYC Overall: <span class="stat-val" id="statNYC">$3,333</span></div>
+  <div>NYC Overall: <span class="stat-val" id="statNYC">$3,348</span></div>
 </div>
 
 <!-- Annotation modal -->
@@ -507,7 +507,7 @@
 
 <script>
 // ============================================================
-// DATA (v5): 41,680 market-rate 1BR listings from StreetEasy (Feb 2026)
+// DATA (v6): 41,623 market-rate 1BR listings from StreetEasy (Feb 2026)
 // RS filtered: rent<$2,500 + non-$5-divisible, Manhattan<96th<$2K, <55% local median
 // Bad property types removed (multi-family, townhouse, etc). No rent capping.
 // Adaptive grid: 0.003° in Manhattan/N.Brooklyn, 0.005° elsewhere
@@ -1791,6 +1791,7 @@ const HEAT_POINTS = [
   {lat:40.686,lng:-73.948,rent:3295,n:5},
   {lat:40.746,lng:-73.923,rent:3295,n:4},
   {lat:40.8,lng:-73.956,rent:3295,n:4},
+  {lat:40.893,lng:-73.911,rent:3295,n:2},
   {lat:40.7,lng:-73.934,rent:3291,n:59},
   {lat:40.71,lng:-73.923,rent:3290,n:3},
   {lat:40.773,lng:-73.929,rent:3283,n:2},
@@ -1805,7 +1806,6 @@ const HEAT_POINTS = [
   {lat:40.678,lng:-74.002,rent:3265,n:17},
   {lat:40.756,lng:-73.93,rent:3264,n:2},
   {lat:40.77,lng:-73.934,rent:3263,n:25},
-  {lat:40.893,lng:-73.908,rent:3261,n:2},
   {lat:40.686,lng:-73.95,rent:3252,n:2},
   {lat:40.698,lng:-73.936,rent:3252,n:7},
   {lat:40.688,lng:-73.938,rent:3251,n:3},
@@ -1882,6 +1882,7 @@ const HEAT_POINTS = [
   {lat:40.664,lng:-73.96,rent:3087,n:4},
   {lat:40.658,lng:-73.99,rent:3083,n:12},
   {lat:40.664,lng:-73.994,rent:3082,n:117},
+  {lat:40.89,lng:-73.911,rent:3081,n:4},
   {lat:40.692,lng:-73.929,rent:3076,n:6},
   {lat:40.694,lng:-73.93,rent:3073,n:2},
   {lat:40.758,lng:-73.93,rent:3072,n:2},
@@ -1947,8 +1948,6 @@ const HEAT_POINTS = [
   {lat:40.704,lng:-73.911,rent:2953,n:3},
   {lat:40.743,lng:-73.923,rent:2953,n:4},
   {lat:40.773,lng:-73.92,rent:2952,n:2},
-  {lat:40.89,lng:-73.911,rent:2952,n:4},
-  {lat:40.893,lng:-73.911,rent:2952,n:2},
   {lat:40.66,lng:-73.98,rent:2951,n:4},
   {lat:40.692,lng:-73.917,rent:2951,n:4},
   {lat:40.701,lng:-73.908,rent:2951,n:36},
@@ -1983,11 +1982,13 @@ const HEAT_POINTS = [
   {lat:40.809,lng:-73.932,rent:2890,n:117},
   {lat:40.716,lng:-73.845,rent:2889,n:3},
   {lat:40.683,lng:-73.911,rent:2887,n:5},
+  {lat:40.89,lng:-73.905,rent:2885,n:5},
   {lat:40.836,lng:-73.95,rent:2881,n:2},
   {lat:40.658,lng:-73.98,rent:2880,n:8},
   {lat:40.797,lng:-73.944,rent:2879,n:11},
   {lat:40.755,lng:-73.833,rent:2869,n:19},
   {lat:40.707,lng:-73.914,rent:2866,n:15},
+  {lat:40.827,lng:-73.92,rent:2866,n:3},
   {lat:40.698,lng:-73.899,rent:2865,n:3},
   {lat:40.686,lng:-73.92,rent:2864,n:2},
   {lat:40.707,lng:-73.905,rent:2864,n:38},
@@ -2001,6 +2002,7 @@ const HEAT_POINTS = [
   {lat:40.658,lng:-74.004,rent:2855,n:5},
   {lat:40.764,lng:-73.929,rent:2853,n:5},
   {lat:40.686,lng:-73.923,rent:2851,n:3},
+  {lat:40.887,lng:-73.905,rent:2851,n:2},
   {lat:40.743,lng:-73.911,rent:2847,n:16},
   {lat:40.662,lng:-73.998,rent:2845,n:9},
   {lat:40.809,lng:-73.956,rent:2844,n:7},
@@ -2035,9 +2037,9 @@ const HEAT_POINTS = [
   {lat:40.686,lng:-73.908,rent:2802,n:3},
   {lat:40.794,lng:-73.941,rent:2802,n:33},
   {lat:40.833,lng:-73.95,rent:2802,n:10},
-  {lat:40.887,lng:-73.905,rent:2802,n:2},
   {lat:40.776,lng:-73.917,rent:2801,n:2},
   {lat:40.654,lng:-73.952,rent:2800,n:40},
+  {lat:40.854,lng:-73.83,rent:2800,n:3},
   {lat:40.658,lng:-73.998,rent:2797,n:4},
   {lat:40.682,lng:-74.008,rent:2796,n:2},
   {lat:40.652,lng:-73.956,rent:2795,n:8},
@@ -2051,14 +2053,15 @@ const HEAT_POINTS = [
   {lat:40.656,lng:-73.974,rent:2787,n:10},
   {lat:40.758,lng:-73.92,rent:2784,n:9},
   {lat:40.676,lng:-74.016,rent:2783,n:5},
+  {lat:40.887,lng:-73.908,rent:2782,n:2},
   {lat:40.68,lng:-73.911,rent:2781,n:5},
   {lat:40.656,lng:-73.976,rent:2780,n:21},
   {lat:40.686,lng:-73.93,rent:2780,n:2},
   {lat:40.701,lng:-73.815,rent:2780,n:2},
   {lat:40.767,lng:-73.92,rent:2778,n:8},
   {lat:40.725,lng:-73.845,rent:2777,n:13},
-  {lat:40.89,lng:-73.905,rent:2777,n:5},
   {lat:40.776,lng:-73.908,rent:2776,n:2},
+  {lat:40.827,lng:-73.917,rent:2776,n:4},
   {lat:40.794,lng:-73.935,rent:2775,n:7},
   {lat:40.656,lng:-73.95,rent:2774,n:9},
   {lat:40.71,lng:-73.914,rent:2774,n:2},
@@ -2090,7 +2093,6 @@ const HEAT_POINTS = [
   {lat:40.755,lng:-73.836,rent:2741,n:18},
   {lat:40.652,lng:-73.948,rent:2740,n:4},
   {lat:40.658,lng:-73.954,rent:2740,n:10},
-  {lat:40.887,lng:-73.908,rent:2740,n:2},
   {lat:40.65,lng:-73.956,rent:2737,n:4},
   {lat:40.791,lng:-73.938,rent:2737,n:9},
   {lat:40.658,lng:-73.95,rent:2735,n:9},
@@ -2167,7 +2169,6 @@ const HEAT_POINTS = [
   {lat:40.66,lng:-73.948,rent:2664,n:10},
   {lat:40.818,lng:-73.947,rent:2664,n:9},
   {lat:40.767,lng:-73.83,rent:2663,n:2},
-  {lat:40.827,lng:-73.92,rent:2662,n:4},
   {lat:40.59,lng:-73.958,rent:2660,n:3},
   {lat:40.725,lng:-73.857,rent:2660,n:26},
   {lat:40.764,lng:-73.911,rent:2660,n:3},
@@ -2254,9 +2255,7 @@ const HEAT_POINTS = [
   {lat:40.614,lng:-73.962,rent:2559,n:21},
   {lat:40.731,lng:-73.863,rent:2558,n:7},
   {lat:40.77,lng:-73.905,rent:2557,n:6},
-  {lat:40.833,lng:-73.92,rent:2555,n:2},
   {lat:40.64,lng:-73.944,rent:2553,n:8},
-  {lat:40.827,lng:-73.917,rent:2553,n:4},
   {lat:40.616,lng:-73.964,rent:2550,n:2},
   {lat:40.707,lng:-73.806,rent:2548,n:131},
   {lat:40.588,lng:-73.95,rent:2546,n:4},
@@ -2367,7 +2366,6 @@ const HEAT_POINTS = [
   {lat:40.616,lng:-73.954,rent:2448,n:6},
   {lat:40.654,lng:-74.002,rent:2447,n:2},
   {lat:40.642,lng:-73.946,rent:2446,n:2},
-  {lat:40.839,lng:-73.908,rent:2446,n:2},
   {lat:40.848,lng:-73.944,rent:2446,n:4},
   {lat:40.713,lng:-73.809,rent:2445,n:4},
   {lat:40.716,lng:-73.836,rent:2445,n:8},
@@ -2454,10 +2452,10 @@ const HEAT_POINTS = [
   {lat:40.713,lng:-73.827,rent:2358,n:12},
   {lat:40.634,lng:-73.964,rent:2355,n:10},
   {lat:40.752,lng:-73.893,rent:2355,n:23},
-  {lat:40.848,lng:-73.833,rent:2354,n:2},
   {lat:40.588,lng:-73.948,rent:2352,n:2},
   {lat:40.713,lng:-73.83,rent:2352,n:35},
   {lat:40.704,lng:-73.815,rent:2351,n:28},
+  {lat:40.908,lng:-73.896,rent:2350,n:5},
   {lat:40.574,lng:-73.988,rent:2347,n:2},
   {lat:40.644,lng:-73.964,rent:2343,n:7},
   {lat:40.857,lng:-73.926,rent:2341,n:5},
@@ -2481,7 +2479,6 @@ const HEAT_POINTS = [
   {lat:40.614,lng:-73.95,rent:2324,n:2},
   {lat:40.638,lng:-73.966,rent:2324,n:3},
   {lat:40.71,lng:-73.8,rent:2324,n:22},
-  {lat:40.842,lng:-73.914,rent:2324,n:2},
   {lat:40.622,lng:-73.964,rent:2322,n:7},
   {lat:40.624,lng:-73.956,rent:2321,n:10},
   {lat:40.665,lng:-73.929,rent:2321,n:5},
@@ -2549,7 +2546,6 @@ const HEAT_POINTS = [
   {lat:40.752,lng:-73.881,rent:2250,n:15},
   {lat:40.749,lng:-73.887,rent:2245,n:4},
   {lat:40.755,lng:-73.821,rent:2245,n:12},
-  {lat:40.869,lng:-73.902,rent:2245,n:2},
   {lat:40.612,lng:-73.954,rent:2244,n:52},
   {lat:40.74,lng:-73.878,rent:2243,n:8},
   {lat:40.642,lng:-73.964,rent:2242,n:2},
@@ -2601,7 +2597,7 @@ const HEAT_POINTS = [
   {lat:40.641,lng:-73.881,rent:2200,n:2},
   {lat:40.821,lng:-73.878,rent:2200,n:3},
   {lat:40.854,lng:-73.914,rent:2200,n:2},
-  {lat:40.878,lng:-73.881,rent:2200,n:2},
+  {lat:40.869,lng:-73.881,rent:2200,n:2},
   {lat:40.636,lng:-73.958,rent:2199,n:17},
   {lat:40.752,lng:-73.875,rent:2199,n:5},
   {lat:40.626,lng:-73.942,rent:2198,n:11},
@@ -2651,7 +2647,6 @@ const HEAT_POINTS = [
   {lat:40.737,lng:-73.863,rent:2159,n:4},
   {lat:40.764,lng:-73.794,rent:2159,n:4},
   {lat:40.634,lng:-73.958,rent:2158,n:13},
-  {lat:40.869,lng:-73.881,rent:2158,n:3},
   {lat:40.866,lng:-73.92,rent:2157,n:20},
   {lat:40.746,lng:-73.878,rent:2156,n:14},
   {lat:40.872,lng:-73.92,rent:2155,n:11},
@@ -2662,6 +2657,8 @@ const HEAT_POINTS = [
   {lat:40.74,lng:-73.866,rent:2151,n:6},
   {lat:40.764,lng:-73.89,rent:2151,n:6},
   {lat:40.612,lng:-73.976,rent:2150,n:3},
+  {lat:40.842,lng:-73.914,rent:2150,n:2},
+  {lat:40.872,lng:-73.884,rent:2150,n:3},
   {lat:40.905,lng:-73.905,rent:2150,n:2},
   {lat:40.68,lng:-73.848,rent:2149,n:4},
   {lat:40.716,lng:-73.824,rent:2149,n:32},
@@ -2679,7 +2676,6 @@ const HEAT_POINTS = [
   {lat:40.648,lng:-74.014,rent:2139,n:11},
   {lat:40.74,lng:-73.779,rent:2139,n:4},
   {lat:40.646,lng:-74.006,rent:2138,n:2},
-  {lat:40.872,lng:-73.887,rent:2138,n:2},
   {lat:40.64,lng:-73.992,rent:2137,n:17},
   {lat:40.707,lng:-73.788,rent:2135,n:3},
   {lat:40.74,lng:-73.875,rent:2135,n:8},
@@ -2715,7 +2711,6 @@ const HEAT_POINTS = [
   {lat:40.713,lng:-73.788,rent:2103,n:93},
   {lat:40.629,lng:-74.025,rent:2102,n:6},
   {lat:40.668,lng:-73.839,rent:2100,n:2},
-  {lat:40.908,lng:-73.896,rent:2100,n:7},
   {lat:40.638,lng:-74.034,rent:2099,n:7},
   {lat:40.644,lng:-73.994,rent:2098,n:15},
   {lat:40.767,lng:-73.815,rent:2097,n:10},
@@ -2736,7 +2731,6 @@ const HEAT_POINTS = [
   {lat:40.698,lng:-73.893,rent:2086,n:3},
   {lat:40.74,lng:-73.872,rent:2086,n:3},
   {lat:40.713,lng:-73.797,rent:2085,n:9},
-  {lat:40.872,lng:-73.884,rent:2085,n:3},
   {lat:40.596,lng:-73.996,rent:2083,n:10},
   {lat:40.606,lng:-73.954,rent:2081,n:7},
   {lat:40.644,lng:-74.079,rent:2080,n:10},
@@ -2748,6 +2742,7 @@ const HEAT_POINTS = [
   {lat:40.875,lng:-73.911,rent:2079,n:162},
   {lat:40.635,lng:-74.028,rent:2078,n:13},
   {lat:40.606,lng:-73.956,rent:2077,n:8},
+  {lat:40.845,lng:-73.83,rent:2075,n:3},
   {lat:40.869,lng:-73.923,rent:2075,n:44},
   {lat:40.632,lng:-74.025,rent:2071,n:11},
   {lat:40.646,lng:-74.004,rent:2070,n:5},
@@ -2774,7 +2769,6 @@ const HEAT_POINTS = [
   {lat:40.725,lng:-73.869,rent:2051,n:6},
   {lat:40.629,lng:-74.076,rent:2050,n:33},
   {lat:40.707,lng:-73.86,rent:2050,n:3},
-  {lat:40.836,lng:-73.923,rent:2050,n:2},
   {lat:40.872,lng:-73.914,rent:2050,n:11},
   {lat:40.6,lng:-73.952,rent:2049,n:5},
   {lat:40.677,lng:-73.86,rent:2047,n:10},
@@ -2795,7 +2789,6 @@ const HEAT_POINTS = [
   {lat:40.644,lng:-74.082,rent:2037,n:38},
   {lat:40.704,lng:-73.89,rent:2037,n:32},
   {lat:40.578,lng:-73.97,rent:2036,n:20},
-  {lat:40.854,lng:-73.83,rent:2035,n:4},
   {lat:40.638,lng:-74.025,rent:2034,n:5},
   {lat:40.644,lng:-74.0,rent:2034,n:2},
   {lat:40.646,lng:-74.02,rent:2034,n:10},
@@ -2812,8 +2805,6 @@ const HEAT_POINTS = [
   {lat:40.641,lng:-74.019,rent:2026,n:12},
   {lat:40.659,lng:-73.929,rent:2025,n:16},
   {lat:40.725,lng:-73.758,rent:2025,n:2},
-  {lat:40.836,lng:-73.914,rent:2025,n:2},
-  {lat:40.845,lng:-73.83,rent:2025,n:4},
   {lat:40.701,lng:-73.89,rent:2024,n:37},
   {lat:40.604,lng:-73.942,rent:2022,n:3},
   {lat:40.623,lng:-74.04,rent:2019,n:4},
@@ -2865,8 +2856,6 @@ const HEAT_POINTS = [
   {lat:40.62,lng:-74.031,rent:1975,n:43},
   {lat:40.662,lng:-73.926,rent:1975,n:3},
   {lat:40.791,lng:-73.812,rent:1975,n:19},
-  {lat:40.854,lng:-73.899,rent:1975,n:2},
-  {lat:40.854,lng:-73.866,rent:1975,n:2},
   {lat:40.713,lng:-73.794,rent:1974,n:2},
   {lat:40.722,lng:-73.815,rent:1973,n:2},
   {lat:40.698,lng:-73.89,rent:1972,n:7},
@@ -2945,7 +2934,6 @@ const HEAT_POINTS = [
   {lat:40.617,lng:-74.028,rent:1857,n:19},
   {lat:40.65,lng:-73.934,rent:1856,n:2},
   {lat:40.728,lng:-73.89,rent:1856,n:7},
-  {lat:40.869,lng:-73.896,rent:1855,n:2},
   {lat:40.761,lng:-73.866,rent:1854,n:2},
   {lat:40.605,lng:-73.752,rent:1852,n:2},
   {lat:40.63,lng:-74.004,rent:1852,n:8},
@@ -3054,7 +3042,6 @@ const HEAT_POINTS = [
   {lat:40.731,lng:-73.899,rent:1752,n:2},
   {lat:40.611,lng:-74.094,rent:1750,n:2},
   {lat:40.692,lng:-73.857,rent:1750,n:12},
-  {lat:40.839,lng:-73.845,rent:1750,n:2},
   {lat:40.586,lng:-73.968,rent:1747,n:25},
   {lat:40.608,lng:-73.988,rent:1745,n:8},
   {lat:40.604,lng:-73.976,rent:1744,n:10},
@@ -3109,7 +3096,6 @@ const HEAT_POINTS = [
   {lat:40.557,lng:-74.163,rent:1700,n:3},
   {lat:40.599,lng:-73.758,rent:1700,n:3},
   {lat:40.692,lng:-73.845,rent:1700,n:13},
-  {lat:40.869,lng:-73.863,rent:1700,n:2},
   {lat:40.608,lng:-73.986,rent:1699,n:2},
   {lat:40.668,lng:-73.902,rent:1699,n:6},
   {lat:40.629,lng:-74.118,rent:1698,n:4},
@@ -3138,7 +3124,6 @@ const HEAT_POINTS = [
   {lat:40.659,lng:-73.923,rent:1671,n:54},
   {lat:40.692,lng:-73.848,rent:1670,n:2},
   {lat:40.618,lng:-73.992,rent:1665,n:8},
-  {lat:40.827,lng:-73.896,rent:1665,n:2},
   {lat:40.698,lng:-73.848,rent:1664,n:2},
   {lat:40.725,lng:-73.899,rent:1662,n:4},
   {lat:40.617,lng:-74.1,rent:1659,n:2},
@@ -3165,7 +3150,6 @@ const HEAT_POINTS = [
   {lat:40.662,lng:-73.89,rent:1618,n:3},
   {lat:40.665,lng:-73.917,rent:1618,n:2},
   {lat:40.659,lng:-73.92,rent:1601,n:26},
-  {lat:40.836,lng:-73.866,rent:1595,n:2},
   {lat:40.628,lng:-73.992,rent:1594,n:2},
   {lat:40.674,lng:-73.749,rent:1594,n:5},
   {lat:40.704,lng:-73.875,rent:1586,n:4},
