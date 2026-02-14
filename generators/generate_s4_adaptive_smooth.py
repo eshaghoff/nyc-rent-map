@@ -1,0 +1,347 @@
+#!/usr/bin/env python3
+"""
+S4: Adaptive smoothing — reduce smoothing radius for high-count cells.
+Cells with many listings (n>=8) get minimal smoothing (0.003°),
+cells with few listings (n=2-3) get full smoothing (0.008°).
+This preserves the identity of data-rich micro-neighborhoods like Noho,
+while still cleaning up noisy sparse cells in outer boroughs.
+"""
+
+import json
+import math
+import os
+from collections import defaultdict, Counter
+from statistics import median
+from datetime import datetime, timedelta
+
+# ─── Load data (active + trailing 4 months rented) ──────────────────────
+cutoff_date = (datetime.now() - timedelta(days=4 * 30)).date()
+CUTOFF_DATE = cutoff_date.strftime("%Y-%m-%d")
+
+with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/rented_raw_v2.json") as f:
+    rented_v2 = json.load(f)
+
+rented_recent = [r for r in rented_v2 if r.get("rented_date", "") >= CUTOFF_DATE]
+
+listings_path = "/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/listings_raw.json"
+listings = []
+if os.path.exists(listings_path):
+    with open(listings_path) as f:
+        listings = json.load(f)
+
+all_raw = listings + rented_recent
+
+if listings:
+    print(f"Raw listings loaded: {len(listings)} active + {len(rented_recent)} rented (4mo) = {len(all_raw)} total")
+else:
+    print(f"Raw listings loaded: {len(rented_recent)} rented (4mo, no active listings available)")
+
+one_br = [l for l in all_raw if l.get("beds") == 1]
+print(f"1BR listings: {len(one_br)}")
+
+BAD_TYPES = {"THREEFAMILY", "TWOFAMILY", "MIXED_USE", "TOWNHOUSE", "LAND",
+             "FOURFAMILY", "MULTIFAMILY", "COMMERCIAL"}
+
+cleaned = []
+for l in one_br:
+    rent = l.get("rent", 0)
+    ptype = (l.get("type") or "").upper()
+    lat = l.get("lat")
+    lng = l.get("lng")
+    if not lat or not lng:
+        continue
+    if rent > 25000:
+        continue
+    if ptype in BAD_TYPES:
+        continue
+    if rent < 500:
+        continue
+    cleaned.append(l)
+
+print(f"After cleaning: {len(cleaned)}")
+
+# Borough assignment (same as baseline)
+BOROUGH_MAP = {
+    "Battery Park City": "Manhattan", "Beekman": "Manhattan", "Carnegie Hill": "Manhattan",
+    "Central Harlem": "Manhattan", "Central Park South": "Manhattan", "Chelsea": "Manhattan",
+    "Chinatown": "Manhattan", "Civic Center": "Manhattan", "East Harlem": "Manhattan",
+    "East Village": "Manhattan", "Financial District": "Manhattan", "Flatiron": "Manhattan",
+    "Fort George": "Manhattan", "Fulton/Seaport": "Manhattan", "Gramercy Park": "Manhattan",
+    "Greenwich Village": "Manhattan", "Hamilton Heights": "Manhattan", "Hell's Kitchen": "Manhattan",
+    "Hudson Heights": "Manhattan", "Hudson Square": "Manhattan", "Hudson Yards": "Manhattan",
+    "Inwood": "Manhattan", "Kips Bay": "Manhattan", "Lenox Hill": "Manhattan",
+    "Lincoln Square": "Manhattan", "Little Italy": "Manhattan", "Lower East Side": "Manhattan",
+    "Madison": "Manhattan", "Manhattan Beach": "Brooklyn", "Manhattan Valley": "Manhattan",
+    "Manhattanville": "Manhattan", "Marble Hill": "Manhattan", "Midtown": "Manhattan",
+    "Midtown South": "Manhattan", "Morningside Heights": "Manhattan", "Murray Hill": "Manhattan",
+    "NoMad": "Manhattan", "Noho": "Manhattan", "Nolita": "Manhattan",
+    "Roosevelt Island": "Manhattan", "Soho": "Manhattan", "South Harlem": "Manhattan",
+    "Stuyvesant Town/PCV": "Manhattan", "Sutton Place": "Manhattan", "Tribeca": "Manhattan",
+    "Turtle Bay": "Manhattan", "Two Bridges": "Manhattan", "Upper Carnegie Hill": "Manhattan",
+    "Upper East Side": "Manhattan", "Upper West Side": "Manhattan", "Washington Heights": "Manhattan",
+    "West Chelsea": "Manhattan", "West Harlem": "Manhattan", "West Village": "Manhattan",
+    "Yorkville": "Manhattan",
+    "Bath Beach": "Brooklyn", "Bay Ridge": "Brooklyn", "Bedford-Stuyvesant": "Brooklyn",
+    "Bensonhurst": "Brooklyn", "Bergen Beach": "Brooklyn", "Boerum Hill": "Brooklyn",
+    "Borough Park": "Brooklyn", "Brooklyn Heights": "Brooklyn", "Brownsville": "Brooklyn",
+    "Bushwick": "Brooklyn", "Canarsie": "Brooklyn", "Carroll Gardens": "Brooklyn",
+    "City Line": "Brooklyn", "Clinton Hill": "Brooklyn", "Cobble Hill": "Brooklyn",
+    "Columbia St Waterfront District": "Brooklyn", "Coney Island": "Brooklyn",
+    "Crown Heights": "Brooklyn", "Cypress Hills": "Brooklyn", "DUMBO": "Brooklyn",
+    "Ditmars-Steinway": "Queens",
+    "Ditmas Park": "Brooklyn", "Downtown Brooklyn": "Brooklyn", "Dyker Heights": "Brooklyn",
+    "East Flatbush": "Brooklyn", "East New York": "Brooklyn", "East Williamsburg": "Brooklyn",
+    "Farragut": "Brooklyn", "Fiske Terrace": "Brooklyn", "Flatbush": "Brooklyn",
+    "Flatlands": "Brooklyn", "Fort Greene": "Brooklyn", "Fort Hamilton": "Brooklyn",
+    "Gowanus": "Brooklyn", "Gravesend": "Brooklyn", "Greenpoint": "Brooklyn",
+    "Greenwood": "Brooklyn", "Homecrest": "Brooklyn", "Kensington": "Brooklyn",
+    "Mapleton": "Brooklyn", "Marine Park": "Brooklyn", "Midwood": "Brooklyn",
+    "Mill Basin": "Brooklyn", "New Lots": "Brooklyn", "Ocean Hill": "Brooklyn",
+    "Park Slope": "Brooklyn", "Prospect Heights": "Brooklyn",
+    "Prospect Lefferts Gardens": "Brooklyn", "Prospect Park South": "Brooklyn",
+    "Red Hook": "Brooklyn", "Sheepshead Bay": "Brooklyn", "Starrett City": "Brooklyn",
+    "Stuyvesant Heights": "Brooklyn", "Sunset Park": "Brooklyn", "Vinegar Hill": "Brooklyn",
+    "Weeksville": "Brooklyn", "Williamsburg": "Brooklyn", "Windsor Terrace": "Brooklyn",
+    "Wingate": "Brooklyn",
+    "Arverne": "Queens", "Astoria": "Queens", "Auburndale": "Queens", "Bay Terrace": "Queens",
+    "Bayside": "Queens", "Bayswater": "Queens", "Beechhurst": "Queens", "Briarwood": "Queens",
+    "Brookville": "Queens", "College Point": "Queens", "Corona": "Queens",
+    "Douglaston": "Queens", "East Elmhurst": "Queens", "East Flushing": "Queens",
+    "Elmhurst": "Queens", "Far Rockaway": "Queens", "Flushing": "Queens",
+    "Forest Hills": "Queens", "Fresh Meadows": "Queens", "Glen Oaks": "Queens",
+    "Glendale": "Queens", "Hillcrest": "Queens", "Hollis": "Queens",
+    "Hunters Point": "Queens", "Jackson Heights": "Queens", "Jamaica": "Queens",
+    "Jamaica Estates": "Queens", "Jamaica Hills": "Queens", "Kew Gardens": "Queens",
+    "Kew Gardens Hills": "Queens", "Laurelton": "Queens", "Lindenwood": "Queens",
+    "Little Neck": "Queens", "Long Island City": "Queens", "Malba": "Queens",
+    "Maspeth": "Queens", "Middle Village": "Queens", "North Corona": "Queens",
+    "North New York": "Queens", "Oakland Gardens": "Queens", "Old Howard Beach": "Queens",
+    "Ozone Park": "Queens", "Pomonok": "Queens", "Queens": "Queens",
+    "Queens Village": "Queens", "Rego Park": "Queens", "Richmond Hill": "Queens",
+    "Ridgewood": "Queens", "Rockaway Park": "Queens", "Rockwood Park": "Queens",
+    "Rosedale": "Queens", "South Jamaica": "Queens", "South Ozone Park": "Queens",
+    "Springfield Gardens": "Queens", "St. Albans": "Queens", "Sunnyside": "Queens",
+    "The Rockaways": "Queens", "Whitestone": "Queens", "Woodhaven": "Queens",
+    "Woodside": "Queens",
+    "Bedford Park": "Bronx", "Belmont": "Bronx", "Bronxwood": "Bronx",
+    "City Island": "Bronx", "Claremont": "Bronx", "Concourse": "Bronx",
+    "Country Club": "Bronx", "Crotona Park East": "Bronx", "East Tremont": "Bronx",
+    "Fieldston": "Bronx", "Fordham": "Bronx", "Highbridge": "Bronx",
+    "Hunts Point": "Bronx", "Kingsbridge": "Bronx", "Kingsbridge Heights": "Bronx",
+    "Laconia": "Bronx", "Locust Point": "Bronx", "Longwood": "Bronx",
+    "Melrose": "Bronx", "Morris Heights": "Bronx", "Morris Park": "Bronx",
+    "Morrisania": "Bronx", "Mott Haven": "Bronx", "Mt. Hope": "Bronx",
+    "Norwood": "Bronx", "Parkchester": "Bronx", "Pelham Bay": "Bronx",
+    "Pelham Gardens": "Bronx", "Pelham Parkway": "Bronx", "Riverdale": "Bronx",
+    "Schuylerville": "Bronx", "Soundview": "Bronx", "Spuyten Duyvil": "Bronx",
+    "Throgs Neck": "Bronx", "Tremont": "Bronx", "University Heights": "Bronx",
+    "Van Nest": "Bronx", "Wakefield": "Bronx", "West Farms": "Bronx",
+    "Westchester Square": "Bronx", "Williamsbridge": "Bronx", "Woodstock": "Bronx",
+    "Annadale": "Staten Island", "Arden Heights": "Staten Island", "Arrochar": "Staten Island",
+    "Bulls Head": "Staten Island", "Castleton Corners": "Staten Island", "Clifton": "Staten Island",
+    "Dongan Hills": "Staten Island", "Elm Park": "Staten Island", "Eltingville": "Staten Island",
+    "Emerson Hill": "Staten Island", "Grant City": "Staten Island", "Graniteville": "Staten Island",
+    "Grasmere": "Staten Island", "Great Kills": "Staten Island", "Grymes Hill": "Staten Island",
+    "Huguenot": "Staten Island", "Mariners Harbor": "Staten Island",
+    "Meiers Corners": "Staten Island", "Midland Beach": "Staten Island",
+    "New Brighton": "Staten Island", "New Dorp": "Staten Island",
+    "New Dorp Beach": "Staten Island", "New Springville": "Staten Island",
+    "Oakwood": "Staten Island", "Park Hill": "Staten Island", "Port Richmond": "Staten Island",
+    "Princes Bay": "Staten Island", "Ramblersville": "Queens",
+    "Richmondtown": "Staten Island", "Rosebank": "Staten Island", "Rossville": "Staten Island",
+    "Saint George": "Staten Island", "Shore Acres": "Staten Island",
+    "Silver Lake": "Staten Island", "South Beach": "Staten Island",
+    "Stapleton": "Staten Island", "Tompkinsville": "Staten Island",
+    "Tottenville": "Staten Island", "West Brighton": "Staten Island",
+    "Westerleigh": "Staten Island", "Willowbrook": "Staten Island",
+    "Woodrow": "Staten Island",
+}
+
+def get_borough(listing):
+    n = listing.get("neighborhood", "")
+    if n in BOROUGH_MAP:
+        return BOROUGH_MAP[n]
+    lat = listing["lat"]
+    lng = listing["lng"]
+    if -74.03 < lng < -73.90 and 40.70 < lat < 40.88:
+        if lng > -73.96 or lat < 40.75:
+            return "Manhattan"
+    if lat < 40.65 and lng < -74.04:
+        return "Staten Island"
+    if lat > 40.80 and lng > -73.94:
+        return "Bronx"
+    if lat > 40.85:
+        return "Bronx"
+    if lat < 40.74:
+        if lng < -73.92:
+            return "Brooklyn"
+        else:
+            return "Queens"
+    if lng > -73.92:
+        return "Queens"
+    return "Unknown"
+
+for l in cleaned:
+    l["borough"] = get_borough(l)
+
+# RS Filter (same as baseline)
+SPATIAL_GRID = 0.01
+spatial_cells = defaultdict(list)
+for l in cleaned:
+    key = (round(l["lat"] / SPATIAL_GRID) * SPATIAL_GRID,
+           round(l["lng"] / SPATIAL_GRID) * SPATIAL_GRID)
+    spatial_cells[key].append(l["rent"])
+
+spatial_medians = {}
+for key, rents in spatial_cells.items():
+    if len(rents) >= 3:
+        spatial_medians[key] = median(rents)
+
+def get_spatial_median(lat, lng):
+    key = (round(lat / SPATIAL_GRID) * SPATIAL_GRID,
+           round(lng / SPATIAL_GRID) * SPATIAL_GRID)
+    return spatial_medians.get(key)
+
+non_rs = []
+for l in cleaned:
+    rent = l["rent"]
+    lat = l["lat"]
+    lng = l["lng"]
+    sm = get_spatial_median(lat, lng)
+    if sm and rent < sm * 0.60:
+        continue
+    non_rs.append(l)
+
+print(f"After RS filter: {len(non_rs)} listings")
+
+# ─── Dense grid with mean rent ─────────────────────────────────────────
+def get_grid_size(lat, lng):
+    if lat < 40.786 and lng > -74.02 and lng < -73.93:
+        return 0.002
+    if 40.68 < lat < 40.73 and -73.99 < lng < -73.93:
+        return 0.002
+    return 0.003
+
+MIN_CELL_COUNT = 2
+
+grid_cells = defaultdict(list)
+for l in non_rs:
+    lat = l["lat"]
+    lng = l["lng"]
+    gs = get_grid_size(lat, lng)
+    cell_lat = round(lat / gs) * gs
+    cell_lng = round(lng / gs) * gs
+    key = (round(cell_lat, 6), round(cell_lng, 6), gs)
+    grid_cells[key].append(l)
+
+heat_points = []
+dropped_thin = 0
+for (clat, clng, gs), lsts in grid_cells.items():
+    if len(lsts) < MIN_CELL_COUNT:
+        dropped_thin += 1
+        continue
+    rents = [l["rent"] for l in lsts]
+    mean_rent = sum(rents) / len(rents)
+    heat_points.append({
+        "lat": round(clat, 4),
+        "lng": round(clng, 4),
+        "rent": int(round(mean_rent)),
+        "count": len(lsts),
+    })
+
+# ─── KEY CHANGE: Adaptive spatial smoothing ───────────────────────────
+# High-count cells (n>=8) are already statistically reliable — barely smooth them.
+# Low-count cells (n=2-3) need smoothing to reduce noise.
+# Linear interpolation: radius shrinks from 0.008 at n=2 to 0.003 at n>=8.
+SMOOTH_MAX_RADIUS = 0.008   # for n=2 cells (~800m)
+SMOOTH_MIN_RADIUS = 0.003   # for n>=8 cells (~300m)
+SMOOTH_N_LOW = 2
+SMOOTH_N_HIGH = 8
+
+def get_smooth_radius(n):
+    """Smoothing radius decreases as cell listing count increases."""
+    if n >= SMOOTH_N_HIGH:
+        return SMOOTH_MIN_RADIUS
+    if n <= SMOOTH_N_LOW:
+        return SMOOTH_MAX_RADIUS
+    # Linear interpolation
+    frac = (n - SMOOTH_N_LOW) / (SMOOTH_N_HIGH - SMOOTH_N_LOW)
+    return SMOOTH_MAX_RADIUS - frac * (SMOOTH_MAX_RADIUS - SMOOTH_MIN_RADIUS)
+
+smoothed_points = []
+smooth_reduced = 0
+for i, hp in enumerate(heat_points):
+    radius = get_smooth_radius(hp["count"])
+    if radius < SMOOTH_MAX_RADIUS:
+        smooth_reduced += 1
+    # Self-weight scales with count: high-count cells resist smoothing more
+    self_weight = max(2.0, hp["count"] / 2.0)
+    total_weight = self_weight
+    weighted_rent = hp["rent"] * self_weight
+    for j, other in enumerate(heat_points):
+        if i == j:
+            continue
+        dlat = hp["lat"] - other["lat"]
+        dlng = hp["lng"] - other["lng"]
+        dist = math.sqrt(dlat**2 + dlng**2)
+        if dist < radius and dist > 0:
+            w = 1.0 / dist
+            total_weight += w
+            weighted_rent += other["rent"] * w
+    smoothed_rent = int(round(weighted_rent / total_weight))
+    smoothed_points.append({
+        "lat": hp["lat"],
+        "lng": hp["lng"],
+        "rent": smoothed_rent,
+        "count": hp["count"],
+    })
+heat_points = smoothed_points
+print(f"Adaptive smoothing: {smooth_reduced}/{len(heat_points)} cells got reduced radius")
+
+# Neighbor median clamping (same as baseline)
+CLAMP_RADIUS = 0.015
+CLAMP_THRESHOLD = 1.50
+CLAMP_MAX_N = 10
+clamped_count = 0
+for i, hp in enumerate(heat_points):
+    if hp["count"] >= CLAMP_MAX_N:
+        continue
+    neighbors = []
+    for j, other in enumerate(heat_points):
+        if i == j:
+            continue
+        dlat = hp["lat"] - other["lat"]
+        dlng = hp["lng"] - other["lng"]
+        dist = math.sqrt(dlat**2 + dlng**2)
+        if dist < CLAMP_RADIUS:
+            neighbors.append(other["rent"])
+    if len(neighbors) >= 1:
+        neighbor_med = sorted(neighbors)[len(neighbors) // 2]
+        if hp["rent"] > neighbor_med * CLAMP_THRESHOLD:
+            hp["rent"] = neighbor_med
+            clamped_count += 1
+print(f"Clamped: {clamped_count} points")
+
+heat_points.sort(key=lambda x: (-x["rent"], x["lat"]))
+print(f"Heat points: {len(heat_points)} (dropped {dropped_thin} thin cells)")
+
+# Write output
+with open("/tmp/heat_points_s4_adaptive_smooth.js", "w") as f:
+    f.write("const HEAT_POINTS = [\n")
+    for hp in heat_points:
+        f.write(f"  {{lat:{hp['lat']},lng:{hp['lng']},rent:{hp['rent']},n:{hp['count']}}},\n")
+    f.write("];\n")
+
+all_rents = [l["rent"] for l in non_rs]
+nyc_mean = int(round(sum(all_rents) / len(all_rents)))
+print(f"\nOutput: /tmp/heat_points_s4_adaptive_smooth.js")
+print(f"NYC overall mean: ${nyc_mean:,}")
+print(f"Total listings: {len(non_rs)}")
+
+# Noho diagnostic
+print("\n--- Noho check ---")
+noho = [hp for hp in heat_points if 40.724 <= hp["lat"] <= 40.732 and -73.996 <= hp["lng"] <= -73.990]
+for hp in sorted(noho, key=lambda x: -x["rent"]):
+    print(f"  ${hp['rent']:>6,}  lat={hp['lat']}, lng={hp['lng']}  n={hp['count']}")
+if not noho:
+    print("  No heat points in Noho core")
