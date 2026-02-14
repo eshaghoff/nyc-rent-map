@@ -387,79 +387,7 @@
     line-height: 1;
   }
 
-  /* Scenario switcher panel */
-  .scenario-panel {
-    position: fixed;
-    top: 70px;
-    left: 24px;
-    z-index: 1000;
-    background: rgba(18,18,26,0.95);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    backdrop-filter: blur(20px);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 200px;
-  }
-  .scenario-panel-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    margin-bottom: 4px;
-  }
-  .scenario-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: left;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
-  .scenario-btn:hover {
-    background: var(--surface);
-    border-color: var(--accent);
-  }
-  .scenario-btn.active {
-    border-color: var(--accent);
-    background: rgba(255,77,77,0.15);
-    color: #fff;
-    font-weight: 500;
-  }
-  .scenario-btn .sc-label { flex: 1; }
-  .scenario-btn .sc-tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--accent);
-    font-weight: 700;
-    white-space: nowrap;
-  }
-  .scenario-btn .sc-pts {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--text-dim);
-    white-space: nowrap;
-  }
-  .scenario-loading {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--accent2);
-    text-align: center;
-    padding: 4px;
-    display: none;
-  }
-  .scenario-loading.visible { display: block; }
+  /* Scenario switcher panel — removed */
 </style>
 </head>
 <body>
@@ -486,25 +414,7 @@
   </div>
 </div>
 
-<div class="scenario-panel" id="scenarioPanel">
-  <div class="scenario-panel-title">Scenario Comparison</div>
-  <button class="scenario-btn active" onclick="loadScenario('s1', this)" id="scenBtnS1">
-    <span class="sc-tag">S1</span>
-    <span class="sc-label">Baseline (Median)</span>
-    <span class="sc-pts">2508 pts</span>
-  </button>
-  <button class="scenario-btn" onclick="loadScenario('s2', this)" id="scenBtnS2">
-    <span class="sc-tag">S2</span>
-    <span class="sc-label">Mean Rent</span>
-    <span class="sc-pts">2508 pts</span>
-  </button>
-  <button class="scenario-btn" onclick="loadScenario('s3', this)" id="scenBtnS3">
-    <span class="sc-tag">S3</span>
-    <span class="sc-label">Rented Past 6 Months</span>
-    <span class="sc-pts">1683 pts</span>
-  </button>
-  <div class="scenario-loading" id="scenarioLoading">Loading...</div>
-</div>
+<!-- Scenario panel removed -->
 
 <div class="controls">
   <button class="control-btn active" onclick="toggleLayer('rent')">
@@ -788,7 +698,7 @@ const NEIGHBORHOODS = [
   {name:"Yorkville",lat:40.7775,lng:-73.9495,rent:3500,count:616,borough:"Manhattan",crime:"low"},
 ];
 
-let HEAT_POINTS = [
+const HEAT_POINTS = [
   {lat:40.724,lng:-74.01,rent:7767,n:21},
   {lat:40.72,lng:-74.008,rent:7714,n:5},
   {lat:40.72,lng:-74.01,rent:7677,n:3},
@@ -5603,97 +5513,7 @@ function saveAnnotation() {
   cancelAnnotation();
 }
 
-// ============================================================
-// SCENARIO SWITCHER
-// ============================================================
-const SCENARIO_FILES = {
-  s2: '/heat_points_s2.js',
-  s3: '/heat_points_s3.js'
-};
-
-let activeScenario = 's1';
-const BASELINE_HEAT_POINTS = HEAT_POINTS.slice();
-
-function recomputeStats(data) {
-  const BB = BOROUGH_BOUNDS;
-  function getBorough(p) {
-    for (const [name, bb] of Object.entries(BB)) {
-      if (p.lat >= bb.latMin && p.lat <= bb.latMax && p.lng >= bb.lngMin && p.lng <= bb.lngMax) return name;
-    }
-    return 'Unknown';
-  }
-  const boroughRents = { Manhattan: [], Brooklyn: [], Queens: [], Bronx: [], 'Staten Island': [] };
-  const allRents = [];
-  data.forEach(p => {
-    const b = getBorough(p);
-    if (boroughRents[b]) boroughRents[b].push(p.rent);
-    allRents.push(p.rent);
-  });
-  function med(arr) {
-    if (!arr.length) return 0;
-    const s = arr.slice().sort((a, b) => a - b);
-    return s[Math.floor(s.length / 2)];
-  }
-  const fmt = v => '$' + v.toLocaleString();
-  const el = id => document.getElementById(id);
-  if (el('statManhattan')) el('statManhattan').textContent = fmt(med(boroughRents['Manhattan']));
-  if (el('statBrooklyn')) el('statBrooklyn').textContent = fmt(med(boroughRents['Brooklyn']));
-  if (el('statQueens')) el('statQueens').textContent = fmt(med(boroughRents['Queens']));
-  if (el('statBronx')) el('statBronx').textContent = fmt(med(boroughRents['Bronx']));
-  if (el('statStatenIsland')) el('statStatenIsland').textContent = fmt(med(boroughRents['Staten Island']));
-  if (el('statNYC')) el('statNYC').textContent = fmt(med(allRents));
-}
-
-function loadScenario(scenarioId, btn) {
-  if (scenarioId === activeScenario) return;
-
-  const loadingEl = document.getElementById('scenarioLoading');
-  loadingEl.classList.add('visible');
-
-  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  if (scenarioId === 's1') {
-    HEAT_POINTS = BASELINE_HEAT_POINTS;
-    window.HEAT_POINTS = HEAT_POINTS;
-    currentHeatPoints = HEAT_POINTS;
-    window.currentHeatPoints = HEAT_POINTS;
-    activeScenario = scenarioId;
-    buildRentLayers(activeBorough);
-    recomputeStats(HEAT_POINTS);
-    loadingEl.classList.remove('visible');
-    return;
-  }
-
-  const file = SCENARIO_FILES[scenarioId];
-  fetch(file + '?t=' + Date.now())
-    .then(r => {
-      if (!r.ok) throw new Error('Failed to load ' + file);
-      return r.text();
-    })
-    .then(text => {
-      const fn = new Function(text + '; return HEAT_POINTS;');
-      const newData = fn();
-      HEAT_POINTS = newData;
-      window.HEAT_POINTS = newData;
-      currentHeatPoints = newData;
-      window.currentHeatPoints = newData;
-      activeScenario = scenarioId;
-      buildRentLayers(activeBorough);
-      recomputeStats(HEAT_POINTS);
-      loadingEl.classList.remove('visible');
-    })
-    .catch(err => {
-      console.error('Scenario load error:', err);
-      loadingEl.textContent = 'Error loading scenario';
-      setTimeout(() => {
-        loadingEl.textContent = 'Loading...';
-        loadingEl.classList.remove('visible');
-      }, 2000);
-      document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('scenBtnS' + activeScenario.slice(1)).classList.add('active');
-    });
-}
+// Scenario switcher removed — baseline only
 </script>
 </body>
 </html>
