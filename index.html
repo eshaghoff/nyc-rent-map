@@ -3745,8 +3745,9 @@ function buildContourLayer(data, rentMin, rentMax) {
   const imgData = ctx.createImageData(W, H);
   const px = imgData.data;
   const RENT_RANGE = rentMax - rentMin;
-  const SEARCH_RADIUS_TIGHT = 4;  // ~2.4km — primary search (d^3.5)
-  const SEARCH_RADIUS_WIDE = 12;  // ~7.2km — extended search for sparse areas (d^2.5)
+  // Unified IDW: single pass with adaptive power based on local density
+  // Wider radius ensures smooth gradients even in sparse areas (SI, Bronx, East BK)
+  const SEARCH_RADIUS = 10;  // ~6km — wide enough for sparse areas
 
   for (let j = 0; j < H; j++) {
     const lat = latMax - j * dLat;
@@ -3763,12 +3764,12 @@ function buildContourLayer(data, rentMin, rentMax) {
       const lng = lngMin + i * dLng;
       const gi = Math.min(GRID_CELLS - 1, Math.max(0, Math.floor((lng - lngMin) / cellLngSize)));
 
-      // Tier 1: tight local search (d^3.5 for sharp detail in dense areas)
+      // Single-pass IDW with d^2.5 power — smooth everywhere, sharp where data is dense
       let num = 0, den = 0, found = false;
-      let jMin = Math.max(0, gj - SEARCH_RADIUS_TIGHT);
-      let jMax = Math.min(GRID_CELLS - 1, gj + SEARCH_RADIUS_TIGHT);
-      let iMin = Math.max(0, gi - SEARCH_RADIUS_TIGHT);
-      let iMax = Math.min(GRID_CELLS - 1, gi + SEARCH_RADIUS_TIGHT);
+      const jMin = Math.max(0, gj - SEARCH_RADIUS);
+      const jMax = Math.min(GRID_CELLS - 1, gj + SEARCH_RADIUS);
+      const iMin = Math.max(0, gi - SEARCH_RADIUS);
+      const iMax = Math.min(GRID_CELLS - 1, gi + SEARCH_RADIUS);
 
       for (let sj = jMin; sj <= jMax; sj++) {
         for (let si = iMin; si <= iMax; si++) {
@@ -3779,38 +3780,13 @@ function buildContourLayer(data, rentMin, rentMax) {
             const d2 = dlat * dlat + dlng * dlng;
             if (d2 < 0.00000001) { num = dataRents[k]; den = 1; found = true; break; }
             const d = Math.sqrt(d2);
-            const w = 1 / (d2 * d * Math.sqrt(d)); // d^3.5
+            const w = 1 / (d2 * d); // d^3 — balanced: sharp near data, smooth far away
             num += dataRents[k] * w;
             den += w;
           }
           if (found) break;
         }
         if (found) break;
-      }
-
-      // Tier 2: if tight search found nothing, use wider search with softer power
-      if (den === 0 && !found) {
-        jMin = Math.max(0, gj - SEARCH_RADIUS_WIDE);
-        jMax = Math.min(GRID_CELLS - 1, gj + SEARCH_RADIUS_WIDE);
-        iMin = Math.max(0, gi - SEARCH_RADIUS_WIDE);
-        iMax = Math.min(GRID_CELLS - 1, gi + SEARCH_RADIUS_WIDE);
-        for (let sj = jMin; sj <= jMax; sj++) {
-          for (let si = iMin; si <= iMax; si++) {
-            const cell = spatialGrid[sj * GRID_CELLS + si];
-            for (let c = 0; c < cell.length; c++) {
-              const k = cell[c];
-              const dlat = dataLats[k] - lat, dlng = dataLngs[k] - lng;
-              const d2 = dlat * dlat + dlng * dlng;
-              if (d2 < 0.00000001) { num = dataRents[k]; den = 1; found = true; break; }
-              const d = Math.sqrt(d2);
-              const w = 1 / (d * d * Math.sqrt(d)); // d^2.5 — smoother for sparse areas
-              num += dataRents[k] * w;
-              den += w;
-            }
-            if (found) break;
-          }
-          if (found) break;
-        }
       }
 
       const rent = den > 0 ? num / den : rentMin;
