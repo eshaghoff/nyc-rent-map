@@ -190,18 +190,14 @@ for l in cleaned:
     lng = l["lng"]
     is_rs = False
 
+    # Rule 1: Non-round rents below $2,500 — DHCR legal rent amounts
     if rent < 2500 and rent % 5 != 0:
         is_rs = True
-    if not is_rs and lat < 40.7857 and -74.03 < lng < -73.90 and l["borough"] == "Manhattan":
-        if rent < 2500:
-            is_rs = True
-    if not is_rs and rent < 1800:
-        sm = get_spatial_median(lat, lng)
-        if sm and rent < sm * 0.60:
-            is_rs = True
+
+    # Rule 2: Below 50% of local spatial median
     if not is_rs:
         sm = get_spatial_median(lat, lng)
-        if sm and rent < sm * 0.55:
+        if sm and rent < sm * 0.50:
             is_rs = True
 
     if not is_rs:

@@ -217,35 +217,17 @@ for l in cleaned:
     is_rs = False
     rule = None
 
-    # Rule 1: Non-round rents below $2,500 are RS legal rents
+    # Rule 1: Non-round rents below $2,500 — these are DHCR legal rent amounts
     if rent < 2500 and rent % 5 != 0:
         is_rs = True
         rule = "odd_under_2500"
 
-    # Rule 2: Manhattan below 96th under $2,500 — no market 1BRs that cheap
-    if not is_rs and lat < 40.7857 and -74.03 < lng < -73.90 and l["borough"] == "Manhattan":
-        if rent < 2500:
-            is_rs = True
-            rule = "manhattan_under_2500"
-
-    # Rule 5: Bronx under $2,000 — market-rate 1BRs don't go below $2K even in cheapest Bronx areas
-    if not is_rs and l["borough"] == "Bronx" and rent < 2000:
-        is_rs = True
-        rule = "bronx_under_2000"
-
-    # Rule 3: Citywide, rent < $1,800 and below 60% of spatial median
-    if not is_rs and rent < 1800:
-        sm = get_spatial_median(lat, lng)
-        if sm and rent < sm * 0.60:
-            is_rs = True
-            rule = "below_60pct_median_under_1800"
-
-    # Rule 4: Below 55% of local spatial median
+    # Rule 2: Below 50% of local spatial median — catches RS in any neighborhood
     if not is_rs:
         sm = get_spatial_median(lat, lng)
-        if sm and rent < sm * 0.55:
+        if sm and rent < sm * 0.50:
             is_rs = True
-            rule = "below_55pct_median"
+            rule = "below_50pct_spatial_median"
 
     if is_rs:
         rs_flagged += 1
