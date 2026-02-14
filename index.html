@@ -5189,6 +5189,8 @@ function buildRentLayers(filter) {
       rentMax = Math.ceil(rentMax / 50) * 50;
       // Cap at global max so legend never exceeds $8,000+
       if (rentMax > RENT_MAX) rentMax = RENT_MAX;
+      // Lower Manhattan: force $8,000 top end for full color spread
+      if (filter === 'Lower Manhattan') rentMax = RENT_MAX;
     }
   }
   activeRentMin = rentMin;
