@@ -5571,19 +5571,19 @@ function buildContourLayer(data, rentMin, rentMax) {
 
       const rent = den > 0 ? num / den : rentMin;
       const ti = Math.max(0, Math.min(255, Math.round((rent - rentMin) / RENT_RANGE * 255)));
-      // Distance-based fade: full opacity within 0.01° (~1km) of data,
-      // fades to transparent by 0.04° (~4km). Eliminates false colors
-      // in data deserts (Staten Island interior, JFK, water crossings).
+      // Distance-based fade: full opacity near data, gradual fade to transparent.
+      // Uses squared-cosine for a smooth, natural falloff (no visible ring).
       const minDist = Math.sqrt(minDist2);
-      const FADE_START = 0.01;  // full opacity up to ~1km from nearest data
-      const FADE_END = 0.04;    // fully transparent beyond ~4km
+      const FADE_END = 0.06;  // fully transparent beyond ~6.5km
       let alpha;
-      if (found || minDist <= FADE_START) {
+      if (found || minDist < 0.001) {
         alpha = 150;
       } else if (minDist >= FADE_END) {
         alpha = 0;
       } else {
-        alpha = Math.round(150 * (1 - (minDist - FADE_START) / (FADE_END - FADE_START)));
+        // Smooth cosine falloff — no hard edge
+        const t = minDist / FADE_END;
+        alpha = Math.round(150 * Math.cos(t * Math.PI / 2) * Math.cos(t * Math.PI / 2));
       }
       px[idx] = COLOR_LUT[ti * 3];
       px[idx+1] = COLOR_LUT[ti * 3 + 1];
