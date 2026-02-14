@@ -415,11 +415,11 @@
 </div>
 
 <div class="scenario-panel" style="position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;gap:8px;background:rgba(18,18,26,0.92);padding:8px 16px;border-radius:12px;border:1px solid var(--border);backdrop-filter:blur(8px);flex-wrap:wrap;justify-content:center;">
-  <button class="scenario-btn active" onclick="switchScenario('baseline')" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">Baseline</button>
-  <button class="scenario-btn" onclick="switchScenario('s2')" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">S2 Dense-Mean</button>
-  <button class="scenario-btn" onclick="switchScenario('s3')" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">S3 6-Month</button>
-  <button class="scenario-btn" onclick="switchScenario('s4')" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">S4 Adaptive-Smooth</button>
-  <button class="scenario-btn" onclick="switchScenario('s5')" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">S5 Relaxed-Clamp</button>
+  <button class="scenario-btn active" onclick="switchScenario('baseline', this)" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">Baseline</button>
+  <button class="scenario-btn" onclick="switchScenario('s2', this)" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">S2 Dense-Mean</button>
+  <button class="scenario-btn" onclick="switchScenario('s3', this)" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">S3 6-Month</button>
+  <button class="scenario-btn" onclick="switchScenario('s4', this)" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">S4 Adaptive-Smooth</button>
+  <button class="scenario-btn" onclick="switchScenario('s5', this)" style="font-family:'Space Mono',monospace;font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;">S5 Relaxed-Clamp</button>
 </div>
 
 <div class="controls">
@@ -10576,10 +10576,10 @@ function saveAnnotation() {
 
 // Scenario switcher
 const baselinePoints = [...HEAT_POINTS];
-function switchScenario(scenario) {
+function switchScenario(scenario, btn) {
   const btns = document.querySelectorAll('.scenario-btn');
   btns.forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  btn.classList.add('active');
   if (scenario === 'baseline') {
     HEAT_POINTS = baselinePoints;
   } else if (scenario === 's2') {
