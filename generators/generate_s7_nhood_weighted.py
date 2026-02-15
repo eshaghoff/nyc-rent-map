@@ -45,7 +45,7 @@ one_br = [l for l in all_raw if l.get("beds") == 1]
 print(f"1BR listings: {len(one_br)}")
 
 # ─── Step 2: Remove bad data ────────────────────────────────────────────
-BAD_TYPES = {"THREEFAMILY", "TWOFAMILY", "MIXED_USE", "TOWNHOUSE", "LAND",
+BAD_TYPES = {"THREEFAMILY", "MIXED_USE", "TOWNHOUSE", "LAND",
              "FOURFAMILY", "MULTIFAMILY", "COMMERCIAL"}
 
 removed_high_rent = 0
