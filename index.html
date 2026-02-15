@@ -3906,10 +3906,10 @@ function rentColor(rent) {
     [0.00, [15,100,40]],
     [0.13, [40,150,55]],
     [0.24, [90,180,60]],
-    [0.355, [170,210,50]],
-    [0.435, [253,216,53]],
-    [0.516, [255,179,0]],
-    [0.581, [255,152,0]],
+    [0.37, [170,210,50]],
+    [0.403, [253,216,53]],
+    [0.50, [255,179,0]],
+    [0.565, [255,152,0]],
     [0.677, [211,47,47]],
     [0.839, [140,0,0]],
     [1.00, [100,0,0]]
@@ -3937,16 +3937,16 @@ function buildContourLayer(data, rentMin, rentMax) {
   const dLng = (lngMax - lngMin) / W;
   const power = 2.5;
 
-  // Color stops: deep green → yellow-green ($4K) → yellow ($4.5K) → orange-yellow ($5.4K) → true red ($6K) → deep red ($7K+)
+  // Color stops: deep green → yellow-green → yellow ($4.3K) → amber → orange → red ($6K) → deep red ($7K+)
   // Positions based on (rent - 1800) / (8000 - 1800)
   const colorStops = [
     [0.00,  15, 100, 40],   // $1,800 — deep green
     [0.13,  40, 150, 55],   // ~$2,600 — medium green
     [0.24,  90, 180, 60],   // ~$3,300 — lighter green
-    [0.355, 170, 210, 50],  // $4,000 — yellow-green
-    [0.435, 253, 216, 53],  // $4,500 — yellow
-    [0.516, 255, 179, 0],   // $5,000 — amber
-    [0.581, 255, 152, 0],   // $5,400 — orange-yellow
+    [0.37,  170, 210, 50],  // ~$4,100 — yellow-green
+    [0.403, 253, 216, 53],  // $4,300 — yellow
+    [0.50,  255, 179, 0],   // ~$4,900 — amber
+    [0.565, 255, 152, 0],   // ~$5,300 — orange
     [0.677, 211, 47, 47],   // $6,000 — true red
     [0.839, 140, 0, 0],     // $7,000 — max dark deep red
     [1.00,  100, 0, 0]      // $8,000 — darkest
