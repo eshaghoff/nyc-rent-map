@@ -12158,20 +12158,18 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 function getRentColor(rent) {
   const min = RENT_MIN, max = RENT_MAX;
   const t = Math.min(1, Math.max(0, (rent - min) / (max - min)));
-  // Match heat map gradient: green → yellow($4K=0.355) → orange($5K=0.516) → red
-  if (t < 0.355) {
-    const s = t / 0.355;
-    return lerpColor([15, 100, 40], [253, 216, 53], s);
-  } else if (t < 0.516) {
-    const s = (t - 0.355) / (0.516 - 0.355);
-    return lerpColor([253, 216, 53], [255, 152, 0], s);
-  } else if (t < 0.75) {
-    const s = (t - 0.516) / (0.75 - 0.516);
-    return lerpColor([255, 152, 0], [211, 47, 47], s);
-  } else {
-    const s = (t - 0.75) / 0.25;
-    return lerpColor([211, 47, 47], [140, 0, 0], s);
+  // Use active bed-count color stops
+  const cs = activeColorStops;
+  for (let i = 0; i < cs.length - 1; i++) {
+    if (t >= cs[i][0] && t <= cs[i+1][0]) {
+      const f = (t - cs[i][0]) / (cs[i+1][0] - cs[i][0]);
+      const r = Math.round(cs[i][1] + f * (cs[i+1][1] - cs[i][1]));
+      const g = Math.round(cs[i][2] + f * (cs[i+1][2] - cs[i][2]));
+      const b = Math.round(cs[i][3] + f * (cs[i+1][3] - cs[i][3]));
+      return `rgb(${r},${g},${b})`;
+    }
   }
+  return 'rgb(140,0,0)';
 }
 
 function lerpColor(a, b, t) {
@@ -12218,31 +12216,60 @@ const BED_RENT_RANGE = {
   '2br': [2500, 12000],
   '3br': [3000, 15000]
 };
+// Per-bed color stop positions (proportional 0–1 within each bed's range)
+// Format: [t, R, G, B] — same colors, different breakpoints per bed count
+const BED_COLOR_STOPS = {
+  '1br': [
+    [0.00,  15, 100, 40],    // $1,800 — deep green
+    [0.13,  40, 150, 55],    // ~$2,600
+    [0.24,  90, 180, 60],    // ~$3,300
+    [0.37,  170, 210, 50],   // ~$4,100 — yellow-green
+    [0.403, 253, 216, 53],   // $4,300 — yellow
+    [0.50,  255, 179, 0],    // ~$4,900 — amber
+    [0.565, 255, 152, 0],    // ~$5,300 — orange
+    [0.677, 211, 47, 47],    // $6,000 — red
+    [0.839, 140, 0, 0],      // $7,000 — dark red
+    [1.00,  100, 0, 0]       // $8,000 — darkest
+  ],
+  '2br': [
+    [0.00,  15, 100, 40],    // $2,500 — deep green
+    [0.11,  40, 150, 55],    // ~$3,550
+    [0.20,  90, 180, 60],    // ~$4,400
+    [0.32,  170, 210, 50],   // ~$5,550 — yellow-green
+    [0.37,  253, 216, 53],   // ~$6,000 — yellow
+    [0.47,  255, 179, 0],    // ~$7,000 — amber
+    [0.53,  255, 152, 0],    // ~$7,550 — orange
+    [0.63,  211, 47, 47],    // ~$8,500 — red
+    [0.82,  140, 0, 0],      // ~$10,300 — dark red
+    [1.00,  100, 0, 0]       // $12,000 — darkest
+  ],
+  '3br': [
+    [0.00,  15, 100, 40],    // $3,000 — deep green
+    [0.10,  40, 150, 55],    // ~$4,200
+    [0.20,  90, 180, 60],    // ~$5,400
+    [0.292, 170, 210, 50],   // $6,500 — yellow-green
+    [0.333, 253, 216, 53],   // $7,000 — yellow
+    [0.42,  255, 179, 0],    // ~$8,000 — amber
+    [0.542, 255, 152, 0],    // $9,500 — orange
+    [0.625, 211, 47, 47],    // ~$10,500 — red
+    [0.82,  140, 0, 0],      // ~$12,800 — dark red
+    [1.00,  100, 0, 0]       // $15,000 — darkest
+  ]
+};
+let activeColorStops = BED_COLOR_STOPS['1br'];
 let RENT_MIN = 1800, RENT_MAX = 8000;
 
 // Color scale: rent value → fill color (green → yellow → orange → red → dark red)
 function rentColor(rent) {
   const t = Math.max(0, Math.min(1, (rent - RENT_MIN) / (RENT_MAX - RENT_MIN)));
-  // Color stops matching our legend
-  const stops = [
-    [0.00, [15,100,40]],
-    [0.13, [40,150,55]],
-    [0.24, [90,180,60]],
-    [0.37, [170,210,50]],
-    [0.403, [253,216,53]],
-    [0.50, [255,179,0]],
-    [0.565, [255,152,0]],
-    [0.677, [211,47,47]],
-    [0.839, [140,0,0]],
-    [1.00, [100,0,0]]
-  ];
-  for (let i = 0; i < stops.length - 1; i++) {
-    if (t >= stops[i][0] && t <= stops[i+1][0]) {
-      const f = (t - stops[i][0]) / (stops[i+1][0] - stops[i][0]);
-      const c0 = stops[i][1], c1 = stops[i+1][1];
-      const r = Math.round(c0[0] + f * (c1[0] - c0[0]));
-      const g = Math.round(c0[1] + f * (c1[1] - c0[1]));
-      const b = Math.round(c0[2] + f * (c1[2] - c0[2]));
+  // Use active bed-count color stops
+  const cs = activeColorStops;
+  for (let i = 0; i < cs.length - 1; i++) {
+    if (t >= cs[i][0] && t <= cs[i+1][0]) {
+      const f = (t - cs[i][0]) / (cs[i+1][0] - cs[i][0]);
+      const r = Math.round(cs[i][1] + f * (cs[i+1][1] - cs[i][1]));
+      const g = Math.round(cs[i][2] + f * (cs[i+1][2] - cs[i][2]));
+      const b = Math.round(cs[i][3] + f * (cs[i+1][3] - cs[i][3]));
       return `rgb(${r},${g},${b})`;
     }
   }
@@ -12259,20 +12286,8 @@ function buildContourLayer(data, rentMin, rentMax) {
   const dLng = (lngMax - lngMin) / W;
   const power = 2.5;
 
-  // Color stops: deep green → yellow-green → yellow ($4.3K) → amber → orange → red ($6K) → deep red ($7K+)
-  // Positions based on (rent - 1800) / (8000 - 1800)
-  const colorStops = [
-    [0.00,  15, 100, 40],   // $1,800 — deep green
-    [0.13,  40, 150, 55],   // ~$2,600 — medium green
-    [0.24,  90, 180, 60],   // ~$3,300 — lighter green
-    [0.37,  170, 210, 50],  // ~$4,100 — yellow-green
-    [0.403, 253, 216, 53],  // $4,300 — yellow
-    [0.50,  255, 179, 0],   // ~$4,900 — amber
-    [0.565, 255, 152, 0],   // ~$5,300 — orange
-    [0.677, 211, 47, 47],   // $6,000 — true red
-    [0.839, 140, 0, 0],     // $7,000 — max dark deep red
-    [1.00,  100, 0, 0]      // $8,000 — darkest
-  ];
+  // Use active bed-count color stops
+  const colorStops = activeColorStops;
 
   // Pre-build 256-entry color LUT for O(1) rent→RGB
   const COLOR_LUT = new Uint8Array(256 * 3);
@@ -12838,6 +12853,7 @@ function applyScenario() {
   const range = BED_RENT_RANGE[activeBeds] || BED_RENT_RANGE['1br'];
   RENT_MIN = range[0];
   RENT_MAX = range[1];
+  activeColorStops = BED_COLOR_STOPS[activeBeds] || BED_COLOR_STOPS['1br'];
   // Update comparison medians for info panel
   const meds = BED_MEDIANS[activeBeds] || BED_MEDIANS['1br'];
   MANHATTAN_MEDIAN = meds.manhattan;
