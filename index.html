@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NYC Rent Heat Map</title>
+<meta property="og:title" content="NYC Rent Heat Map">
+<meta property="og:description" content="Interactive heat map of every NYC neighborhood's 1BR rent. 14,000 StreetEasy listings visualized.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://eshaghoff.github.io/nyc-rent-map">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@sameshaghoff">
+<meta name="twitter:creator" content="@sameshaghoff">
+<meta name="twitter:title" content="NYC Rent Heat Map">
+<meta name="twitter:description" content="Interactive heat map of every NYC neighborhood's 1BR rent. 14,000 StreetEasy listings visualized.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
@@ -79,6 +88,13 @@
     font-family: 'Space Mono', monospace;
     letter-spacing: 1px;
   }
+
+  .twitter-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .twitter-link:hover { text-decoration: underline; }
 
   /* Legend */
   .legend-bar {
@@ -435,7 +451,7 @@
 <div class="top-bar">
   <div>
     <div class="logo">NYC RENT <span>HEAT MAP</span></div>
-    <div class="subtitle">13,942 Market-Rate 1BR Listings &middot; StreetEasy &middot; Feb 2026</div>
+    <div class="subtitle">13,942 Market-Rate 1BR Listings &middot; StreetEasy &middot; Feb 2026 &middot; by <a href="https://x.com/sameshaghoff" target="_blank" class="twitter-link">@sameshaghoff</a></div>
   </div>
   <div>
     <div class="legend-bar">
