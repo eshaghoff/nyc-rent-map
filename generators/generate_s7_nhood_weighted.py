@@ -1,48 +1,121 @@
 #!/usr/bin/env python3
 """
-S7: Neighborhood-weighted cell means.
-When computing a grid cell's rent, each StreetEasy neighborhood contributes
-equally instead of each listing. A cell with 3 Noho listings at $7k and
-25 East Village listings at $4k becomes ($7k + $4k)/2 = $5.5k instead of
-a straight mean of $4.3k. This prevents large cheap neighborhoods from
-drowning out small expensive ones within shared grid cells.
-Smoothing and clamping remain identical to baseline.
+Heat map generator: Neighborhood-weighted cell rents with adaptive lookback.
+Produces both mean and median datasets for a given bedroom count.
+
+Features:
+- Neighborhood-weighted: each StreetEasy neighborhood contributes equally
+  within shared grid cells (prevents large cheap hoods drowning out small expensive ones)
+- Adaptive lookback: uses 4-month data by default, extends to 12 months for
+  neighborhoods with < MIN_NHOOD_LISTINGS listings
+- Outputs both mean and median heat point arrays
+
+Usage:
+  python3 generate_s7_nhood_weighted.py          # 1BR (default)
+  python3 generate_s7_nhood_weighted.py --beds 2  # 2BR
+  python3 generate_s7_nhood_weighted.py --beds 3  # 3+BR
 """
 
 import json
 import math
 import os
+import sys
 from collections import defaultdict, Counter
 from statistics import median
 from datetime import datetime, timedelta
 
-# ─── Load data (active + trailing 4 months rented) ──────────────────────
-cutoff_date = (datetime.now() - timedelta(days=4 * 30)).date()
-CUTOFF_DATE = cutoff_date.strftime("%Y-%m-%d")
+# ─── Configuration ────────────────────────────────────────────────────────
+# Parse --beds argument (default: 1)
+BEDS = 1
+for i, arg in enumerate(sys.argv):
+    if arg == "--beds" and i + 1 < len(sys.argv):
+        BEDS = int(sys.argv[i + 1])
 
-with open("/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/rented_raw_v2.json") as f:
-    rented_v2 = json.load(f)
+BEDS_LABEL = f"{BEDS}BR" if BEDS < 3 else "3+BR"
+SCRAPER_DIR = "/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper"
 
-rented_recent = [r for r in rented_v2 if r.get("rented_date", "") >= CUTOFF_DATE]
+# File paths per bed count
+RENTED_FILES = {
+    1: os.path.join(SCRAPER_DIR, "rented_raw_v2.json"),
+    2: os.path.join(SCRAPER_DIR, "rented_raw_v2_2br.json"),
+    3: os.path.join(SCRAPER_DIR, "rented_raw_v2_3br.json"),
+}
+ACTIVE_FILES = {
+    1: os.path.join(SCRAPER_DIR, "listings_raw.json"),
+    2: os.path.join(SCRAPER_DIR, "listings_raw_2br.json"),
+    3: os.path.join(SCRAPER_DIR, "listings_raw_3br.json"),
+}
 
-# Load active listings if available
-listings_path = "/Users/SamuelEshaghoff1/Downloads/nyc-rent-scraper/listings_raw.json"
+# Adaptive lookback: 4 months default, extend to 12 months for sparse neighborhoods
+DEFAULT_MONTHS = 4
+EXTENDED_MONTHS = 12
+MIN_NHOOD_LISTINGS = 10  # if a neighborhood has fewer than this in 4mo, extend to 12mo
+
+cutoff_default = (datetime.now() - timedelta(days=DEFAULT_MONTHS * 30)).date().strftime("%Y-%m-%d")
+cutoff_extended = (datetime.now() - timedelta(days=EXTENDED_MONTHS * 30)).date().strftime("%Y-%m-%d")
+
+# ─── Load data ────────────────────────────────────────────────────────────
+rented_path = RENTED_FILES.get(BEDS, RENTED_FILES[3])
+active_path = ACTIVE_FILES.get(BEDS, ACTIVE_FILES[3])
+
+rented_v2 = []
+if os.path.exists(rented_path):
+    with open(rented_path) as f:
+        rented_v2 = json.load(f)
+
+# Split rented into default (4mo) and extended (12mo) pools
+rented_default = [r for r in rented_v2 if r.get("rented_date", "") >= cutoff_default]
+rented_extended = [r for r in rented_v2 if r.get("rented_date", "") >= cutoff_extended]
+
+# Load active listings
 listings = []
-if os.path.exists(listings_path):
-    with open(listings_path) as f:
+if os.path.exists(active_path):
+    with open(active_path) as f:
         listings = json.load(f)
 
-all_raw = listings + rented_recent
+# Phase 1: Start with active + 4-month rented
+all_raw_default = listings + rented_default
 
-if listings:
-    print(f"Raw listings loaded: {len(listings)} active + {len(rented_recent)} rented (4mo) = {len(all_raw)} total")
-else:
-    print(f"Raw listings loaded: {len(rented_recent)} rented (4mo, no active listings available)")
+print(f"{'='*60}")
+print(f"  Generating {BEDS_LABEL} heat map data")
+print(f"{'='*60}")
+print(f"Active: {len(listings)} listings from {active_path}")
+print(f"Rented (4mo): {len(rented_default)} listings")
+print(f"Rented (12mo): {len(rented_extended)} listings")
 print(f"Date range for subtitle: {datetime.now().strftime('%b %Y')}")
 
-# ─── Step 1: Filter to 1BR only ─────────────────────────────────────────
-one_br = [l for l in all_raw if l.get("beds") == 1]
-print(f"1BR listings: {len(one_br)}")
+# ─── Step 1: Filter to target bed count ──────────────────────────────────
+if BEDS >= 3:
+    target_br_default = [l for l in all_raw_default if l.get("beds", 0) >= 3]
+    extended_pool = [l for l in (listings + rented_extended) if l.get("beds", 0) >= 3]
+else:
+    target_br_default = [l for l in all_raw_default if l.get("beds") == BEDS]
+    extended_pool = [l for l in (listings + rented_extended) if l.get("beds") == BEDS]
+
+print(f"{BEDS_LABEL} listings (4mo): {len(target_br_default)}")
+print(f"{BEDS_LABEL} listings (12mo pool): {len(extended_pool)}")
+
+# ─── Step 1b: Adaptive lookback — fill sparse neighborhoods ──────────────
+# Count listings per neighborhood in the default pool
+nhood_counts = Counter(l.get("neighborhood", "Unknown") for l in target_br_default)
+sparse_nhoods = {n for n, c in nhood_counts.items() if c < MIN_NHOOD_LISTINGS}
+
+# For sparse neighborhoods, pull in additional listings from extended pool
+extended_ids = {l.get("id") for l in target_br_default}
+extended_additions = 0
+for l in extended_pool:
+    if l.get("id") in extended_ids:
+        continue
+    nhood = l.get("neighborhood", "Unknown")
+    if nhood in sparse_nhoods:
+        target_br_default.append(l)
+        extended_ids.add(l.get("id"))
+        extended_additions += 1
+
+one_br = target_br_default  # Keep variable name for backward compat with rest of pipeline
+print(f"\nAdaptive lookback: {len(sparse_nhoods)} sparse neighborhoods (< {MIN_NHOOD_LISTINGS} listings in 4mo)")
+print(f"  Extended {extended_additions} additional listings from 12-month pool")
+print(f"  Total {BEDS_LABEL} listings after adaptive fill: {len(one_br)}")
 
 # ─── Step 2: Remove bad data ────────────────────────────────────────────
 BAD_TYPES = {"THREEFAMILY", "MIXED_USE", "TOWNHOUSE", "LAND",
@@ -431,9 +504,15 @@ def write_js(points, var_name, path):
             f.write(f"  {{lat:{hp['lat']},lng:{hp['lng']},rent:{hp['rent']},n:{hp['count']}}},\n")
         f.write("];\n")
 
-write_js(heat_points_mean, "MEAN_POINTS", "/tmp/heat_points_mean.js")
-write_js(heat_points_median, "MEDIAN_POINTS", "/tmp/heat_points_median.js")
-print(f"\nOutput: /tmp/heat_points_mean.js, /tmp/heat_points_median.js")
+bed_suffix = {"1": "_1br", "2": "_2br", "3": "_3br"}[str(min(BEDS, 3))]
+mean_var = f"MEAN{bed_suffix.upper()}"
+median_var = f"MEDIAN{bed_suffix.upper()}"
+mean_path = f"/tmp/heat_points_mean{bed_suffix}.js"
+median_path = f"/tmp/heat_points_median{bed_suffix}.js"
+
+write_js(heat_points_mean, mean_var, mean_path)
+write_js(heat_points_median, median_var, median_path)
+print(f"\nOutput: {mean_path}, {median_path}")
 
 
 # ─── Summary ─────────────────────────────────────────────────────────────
