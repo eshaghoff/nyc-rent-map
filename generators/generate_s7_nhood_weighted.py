@@ -323,113 +323,145 @@ for l in non_rs:
     key = (round(cell_lat, 6), round(cell_lng, 6), gs)
     grid_cells[key].append(l)
 
-heat_points = []
+# ─── Build raw cell rents for BOTH mean and median ──────────────────────
+mean_points_raw = []
+median_points_raw = []
 dropped_thin = 0
 nhood_weighted_cells = 0
 for (clat, clng, gs), lsts in grid_cells.items():
     if len(lsts) < MIN_CELL_COUNT:
         dropped_thin += 1
         continue
-    # ─── KEY CHANGE: Neighborhood-weighted mean ─────────────────────
-    # Group listings by neighborhood, compute mean per neighborhood,
-    # then average across neighborhoods (each neighborhood = equal weight).
+    # Group listings by neighborhood
     by_nhood = defaultdict(list)
     for l in lsts:
         nhood = l.get("neighborhood", "Unknown")
         by_nhood[nhood].append(l["rent"])
+
+    # ─── MEAN: Neighborhood-weighted mean ─────────────────────────────
     if len(by_nhood) > 1:
-        # Multiple neighborhoods share this cell — weight equally
-        nhood_means = []
-        for nhood, rents in by_nhood.items():
-            nhood_means.append(sum(rents) / len(rents))
-        cell_rent = sum(nhood_means) / len(nhood_means)
+        nhood_means = [sum(r) / len(r) for r in by_nhood.values()]
+        cell_mean = sum(nhood_means) / len(nhood_means)
         nhood_weighted_cells += 1
     else:
-        # Single neighborhood — straight mean (no change from baseline)
         rents = [l["rent"] for l in lsts]
-        cell_rent = sum(rents) / len(rents)
-    heat_points.append({
-        "lat": round(clat, 4),
-        "lng": round(clng, 4),
-        "rent": int(round(cell_rent)),
-        "count": len(lsts),
-    })
-print(f"Neighborhood-weighted cells: {nhood_weighted_cells}/{len(heat_points)} cells had multiple neighborhoods")
+        cell_mean = sum(rents) / len(rents)
 
-# ─── Spatial smoothing pass ─────────────────────────────────────────────
-SMOOTH_RADIUS = 0.008
-smoothed_points = []
-for i, hp in enumerate(heat_points):
-    total_weight = 2.0
-    weighted_rent = hp["rent"] * 2.0
-    for j, other in enumerate(heat_points):
-        if i == j:
+    # ─── MEDIAN: Neighborhood-weighted median ─────────────────────────
+    if len(by_nhood) > 1:
+        nhood_medians = [median(r) for r in by_nhood.values()]
+        cell_med = median(nhood_medians)
+    else:
+        rents = [l["rent"] for l in lsts]
+        cell_med = median(rents)
+
+    base = {"lat": round(clat, 4), "lng": round(clng, 4), "count": len(lsts)}
+    mean_points_raw.append({**base, "rent": int(round(cell_mean))})
+    median_points_raw.append({**base, "rent": int(round(cell_med))})
+
+print(f"Neighborhood-weighted cells: {nhood_weighted_cells}/{len(mean_points_raw)} cells had multiple neighborhoods")
+
+
+# ─── Smoothing + clamping pipeline (shared for both datasets) ────────────
+def smooth_and_clamp(points, label=""):
+    """Apply spatial smoothing and neighbor clamping to a set of heat points."""
+    SMOOTH_RADIUS = 0.008
+    smoothed = []
+    for i, hp in enumerate(points):
+        total_weight = 2.0
+        weighted_rent = hp["rent"] * 2.0
+        for j, other in enumerate(points):
+            if i == j:
+                continue
+            dlat = hp["lat"] - other["lat"]
+            dlng = hp["lng"] - other["lng"]
+            dist = math.sqrt(dlat**2 + dlng**2)
+            if dist < SMOOTH_RADIUS and dist > 0:
+                w = 1.0 / dist
+                total_weight += w
+                weighted_rent += other["rent"] * w
+        smoothed.append({
+            "lat": hp["lat"], "lng": hp["lng"],
+            "rent": int(round(weighted_rent / total_weight)),
+            "count": hp["count"],
+        })
+
+    CLAMP_RADIUS = 0.015
+    CLAMP_THRESHOLD = 1.50
+    CLAMP_MAX_N = 10
+    clamped_count = 0
+    for i, hp in enumerate(smoothed):
+        if hp["count"] >= CLAMP_MAX_N:
             continue
-        dlat = hp["lat"] - other["lat"]
-        dlng = hp["lng"] - other["lng"]
-        dist = math.sqrt(dlat**2 + dlng**2)
-        if dist < SMOOTH_RADIUS and dist > 0:
-            w = 1.0 / dist
-            total_weight += w
-            weighted_rent += other["rent"] * w
-    smoothed_rent = int(round(weighted_rent / total_weight))
-    smoothed_points.append({
-        "lat": hp["lat"],
-        "lng": hp["lng"],
-        "rent": smoothed_rent,
-        "count": hp["count"],
-    })
-heat_points = smoothed_points
-print(f"Spatial smoothing applied (radius={SMOOTH_RADIUS}deg, ~800m)")
+        neighbors = []
+        for j, other in enumerate(smoothed):
+            if i == j:
+                continue
+            dlat = hp["lat"] - other["lat"]
+            dlng = hp["lng"] - other["lng"]
+            dist = math.sqrt(dlat**2 + dlng**2)
+            if dist < CLAMP_RADIUS:
+                neighbors.append(other["rent"])
+        if len(neighbors) >= 1:
+            neighbor_med = sorted(neighbors)[len(neighbors) // 2]
+            if hp["rent"] > neighbor_med * CLAMP_THRESHOLD:
+                hp["rent"] = neighbor_med
+                clamped_count += 1
 
-# ─── Neighbor median clamping ────────────────────────────────────────────
-# FIX: Relaxed from >= 2 neighbors to >= 1 to catch isolated outliers
-CLAMP_RADIUS = 0.015
-CLAMP_THRESHOLD = 1.50
-CLAMP_MAX_N = 10
-clamped_count = 0
-for i, hp in enumerate(heat_points):
-    if hp["count"] >= CLAMP_MAX_N:
-        continue
-    neighbors = []
-    for j, other in enumerate(heat_points):
-        if i == j:
-            continue
-        dlat = hp["lat"] - other["lat"]
-        dlng = hp["lng"] - other["lng"]
-        dist = math.sqrt(dlat**2 + dlng**2)
-        if dist < CLAMP_RADIUS:
-            neighbors.append(other["rent"])
-    if len(neighbors) >= 1:
-        neighbor_med = sorted(neighbors)[len(neighbors) // 2]
-        if hp["rent"] > neighbor_med * CLAMP_THRESHOLD:
-            old_rent = hp["rent"]
-            hp["rent"] = neighbor_med
-            clamped_count += 1
-            if old_rent > neighbor_med * 2:
-                print(f"  CLAMPED: ({hp['lat']},{hp['lng']}) ${old_rent:,} → ${neighbor_med:,} (n={hp['count']}, {len(neighbors)} neighbors)")
-print(f"Neighbor median clamping: {clamped_count} points clamped (n<{CLAMP_MAX_N}, >{CLAMP_THRESHOLD:.0%} of neighbor median)")
+    smoothed.sort(key=lambda x: (-x["rent"], x["lat"]))
+    print(f"  [{label}] Smoothing + clamping: {clamped_count} points clamped")
+    return smoothed
 
-heat_points.sort(key=lambda x: (-x["rent"], x["lat"]))
-print(f"\nHeat points generated: {len(heat_points)} (dropped {dropped_thin} thin cells with <{MIN_CELL_COUNT} listings)")
+
+print(f"\nProcessing mean dataset...")
+heat_points_mean = smooth_and_clamp(mean_points_raw, "mean")
+print(f"Processing median dataset...")
+heat_points_median = smooth_and_clamp(median_points_raw, "median")
+print(f"\nHeat points generated: {len(heat_points_mean)} (dropped {dropped_thin} thin cells with <{MIN_CELL_COUNT} listings)")
+
+# For backward compat (diagnostics below use heat_points)
+heat_points = heat_points_mean
+
 
 # ─── Write output ────────────────────────────────────────────────────────
-with open("/tmp/heat_points_s7_nhood_weighted.js", "w") as f:
-    f.write("const HEAT_POINTS = [\n")
-    for hp in heat_points:
-        f.write(f"  {{lat:{hp['lat']},lng:{hp['lng']},rent:{hp['rent']},n:{hp['count']}}},\n")
-    f.write("];\n")
+def write_js(points, var_name, path):
+    with open(path, "w") as f:
+        f.write(f"const {var_name} = [\n")
+        for hp in points:
+            f.write(f"  {{lat:{hp['lat']},lng:{hp['lng']},rent:{hp['rent']},n:{hp['count']}}},\n")
+        f.write("];\n")
 
-print(f"\nOutput: /tmp/heat_points_s7_nhood_weighted.js")
+write_js(heat_points_mean, "MEAN_POINTS", "/tmp/heat_points_mean.js")
+write_js(heat_points_median, "MEDIAN_POINTS", "/tmp/heat_points_median.js")
+print(f"\nOutput: /tmp/heat_points_mean.js, /tmp/heat_points_median.js")
+
 
 # ─── Summary ─────────────────────────────────────────────────────────────
 all_rents = [l["rent"] for l in non_rs]
 nyc_mean = int(round(sum(all_rents) / len(all_rents)))
+nyc_median = int(round(median(all_rents)))
 print(f"\nNYC overall mean: ${nyc_mean:,}")
+print(f"NYC overall median: ${nyc_median:,}")
 print(f"Total listings used: {len(non_rs)}")
 
+# Region stats for both mean and median
+print(f"\n--- Region stats (for index.html) ---")
+print(f"MEAN:")
+for borough, lsts in sorted(borough_listings.items()):
+    rents = [l["rent"] for l in lsts]
+    avg = int(round(sum(rents) / len(rents)))
+    print(f"  {borough}: ${avg:,.0f} (n={len(rents)})")
+print(f"  NYC Overall: ${nyc_mean:,}")
+
+print(f"MEDIAN:")
+for borough, lsts in sorted(borough_listings.items()):
+    rents = [l["rent"] for l in lsts]
+    med = int(round(median(rents)))
+    print(f"  {borough}: ${med:,.0f} (n={len(rents)})")
+print(f"  NYC Overall: ${nyc_median:,}")
+
 # Noho / Nolita diagnostic
-print("\n--- Key micro-neighborhood check ---")
+print("\n--- Key micro-neighborhood check (mean) ---")
 checks = {
     "Noho":          (40.724, 40.732, -73.996, -73.990),
     "Nolita":        (40.720, 40.726, -73.998, -73.992),
