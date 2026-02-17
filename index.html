@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NYC Rent Heat Map</title>
 <meta property="og:title" content="NYC Rent Heat Map">
-<meta property="og:description" content="Interactive heat map of every NYC neighborhood's 1BR rent. 14,000 StreetEasy listings visualized.">
+<meta property="og:description" content="Interactive heat map of NYC neighborhood rents — 1BR, 2BR, and 3+BR. By @sameshaghoff & @westeggdev.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://eshaghoff.github.io/nyc-rent-map">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@sameshaghoff">
 <meta name="twitter:creator" content="@sameshaghoff">
 <meta name="twitter:title" content="NYC Rent Heat Map">
-<meta name="twitter:description" content="Interactive heat map of every NYC neighborhood's 1BR rent. 14,000 StreetEasy listings visualized.">
+<meta name="twitter:description" content="Interactive heat map of NYC neighborhood rents — 1BR, 2BR, and 3+BR. By @sameshaghoff & @westeggdev.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
@@ -90,10 +90,10 @@
   }
 
   .attribution {
-    margin-top: 6px;
+    margin-top: 8px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 15px;
+    font-weight: 600;
     color: var(--text);
     letter-spacing: 0.5px;
   }
@@ -102,11 +102,12 @@
     color: var(--accent);
     text-decoration: none;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 16px;
+    text-shadow: 0 0 6px rgba(255,77,77,0.3);
   }
   .twitter-link:hover {
     text-decoration: underline;
-    text-shadow: 0 0 8px rgba(255,77,77,0.5);
+    text-shadow: 0 0 12px rgba(255,77,77,0.6);
   }
 
   /* Legend */
@@ -470,7 +471,7 @@
 <div class="top-bar">
   <div>
     <div class="logo">NYC RENT <span>HEAT MAP</span></div>
-    <div class="subtitle">14,184 Market-Rate 1BR Listings &middot; StreetEasy &middot; Feb 2026</div>
+    <div class="subtitle">14,184 Market-Rate 1BR Listings &middot; Feb 2026</div>
     <div class="attribution">by <a href="https://x.com/sameshaghoff" target="_blank" class="twitter-link">@sameshaghoff</a> &amp; <a href="https://x.com/westeggdev" target="_blank" class="twitter-link">@westeggdev</a></div>
   </div>
   <div>
@@ -591,7 +592,7 @@
 
 <script>
 // ============================================================
-// DATA (v6): 41,623 market-rate 1BR listings from StreetEasy (Feb 2026)
+// DATA (v6): market-rate listings (Feb 2026)
 // RS filtered: rent<$2,500 + non-$5-divisible, Manhattan<96th<$2K, <55% local median
 // Bad property types removed (multi-family, townhouse, etc). No rent capping.
 // Adaptive grid: 0.003° in Manhattan/N.Brooklyn, 0.005° elsewhere
@@ -12870,7 +12871,7 @@ function applyScenario() {
   if (subtitleEl) {
     const count = LISTING_COUNTS[activeBeds] || '—';
     const bedText = activeBeds === '3br' ? '3+BR' : activeBeds.toUpperCase();
-    subtitleEl.innerHTML = `${count} Market-Rate ${bedText} Listings &middot; StreetEasy &middot; Feb 2026`;
+    subtitleEl.innerHTML = `${count} Market-Rate ${bedText} Listings &middot; Feb 2026`;
   }
 
   // Update stats bar
