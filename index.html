@@ -456,6 +456,86 @@
   }
 
   /* Scenario switcher panel — removed */
+
+  /* ─── Responsive: desktop iframe embed (400px height) ─── */
+  @media (max-height: 500px) {
+    .top-bar { padding: 8px 16px 16px; }
+    .logo { font-size: 11px; letter-spacing: 2px; }
+    .subtitle { font-size: 9px; margin-top: 2px; }
+    .attribution { font-size: 12px; margin-top: 4px; }
+    .twitter-link { font-size: 13px; }
+    .legend-bar { gap: 6px; margin-top: 2px; }
+    .legend-gradient { width: 120px; height: 6px; }
+    .legend-label { font-size: 8px; }
+    .scenario-bar { bottom: 48px; padding: 4px; gap: 4px; }
+    .scenario-btn { font-size: 9px; padding: 3px 10px; }
+    .filter-bar { bottom: 12px; padding: 4px; gap: 4px; }
+    .filter-btn { font-size: 9px; padding: 3px 8px; }
+    .stats-bar { bottom: 12px; right: 12px; padding: 8px 10px; font-size: 8px; }
+    .controls { bottom: 12px; left: 12px; gap: 4px; }
+    .control-btn { font-size: 10px; padding: 5px 10px; gap: 6px; }
+    .control-dot { width: 6px; height: 6px; }
+    .info-panel { top: 50px; right: 12px; width: 220px; padding: 12px; }
+    .info-panel h3 { font-size: 12px; }
+    .info-rent { font-size: 22px; }
+    .info-label { font-size: 9px; }
+    .info-borough { font-size: 9px; }
+    .info-stat-label { font-size: 8px; }
+    .info-stat-value { font-size: 11px; }
+    .rent-tooltip { font-size: 11px; padding: 4px 8px; }
+    .tt-rent { font-size: 13px; }
+    .tt-label { font-size: 9px; }
+  }
+
+  /* ─── Responsive: mobile iframe embed (350px height) ─── */
+  @media (max-height: 350px) {
+    .top-bar { padding: 6px 12px 10px; }
+    .logo { font-size: 10px; letter-spacing: 1.5px; }
+    .subtitle { font-size: 8px; margin-top: 1px; }
+    .attribution { display: none; }
+    .legend-gradient { width: 90px; height: 5px; }
+    .legend-label { font-size: 7px; }
+    .stats-bar { display: none; }
+    .controls { display: none; }
+    .info-panel { display: none !important; }
+    .scenario-bar { bottom: 36px; padding: 3px; gap: 3px; border-radius: 6px; }
+    .scenario-btn { font-size: 8px; padding: 2px 8px; border-radius: 4px; }
+    .scenario-divider { margin: 1px 2px; }
+    .filter-bar { bottom: 8px; padding: 3px; gap: 3px; border-radius: 6px; }
+    .filter-btn { font-size: 8px; padding: 2px 6px; border-radius: 4px; }
+    .rent-tooltip { font-size: 10px; padding: 3px 6px; border-radius: 4px; }
+    .tt-rent { font-size: 11px; }
+    .tt-label { font-size: 8px; }
+  }
+
+  /* ─── Responsive: narrow viewports ─── */
+  @media (max-width: 600px) {
+    .top-bar { padding: 10px 12px 20px; }
+    .logo { font-size: 11px; letter-spacing: 2px; }
+    .subtitle { font-size: 9px; }
+    .attribution { font-size: 12px; }
+    .twitter-link { font-size: 13px; }
+    .legend-gradient { width: 100px; height: 6px; }
+    .legend-label { font-size: 8px; }
+    .filter-bar { max-width: 95vw; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+    .filter-btn { flex-shrink: 0; }
+    .stats-bar { right: 12px; max-width: 140px; font-size: 9px; padding: 8px 10px; }
+    .info-panel { right: 12px; width: 240px; padding: 14px; }
+    .info-rent { font-size: 26px; }
+    .controls { left: 12px; }
+    .control-btn { font-size: 10px; padding: 6px 10px; }
+    .modal { width: calc(100vw - 32px); max-width: 320px; }
+  }
+
+  /* ─── Responsive: narrow + short (mobile iframe worst case) ─── */
+  @media (max-width: 600px) and (max-height: 350px) {
+    .attribution { display: none; }
+    .stats-bar { display: none; }
+    .controls { display: none; }
+    .info-panel { display: none !important; }
+    .filter-bar { bottom: 6px; }
+    .scenario-bar { bottom: 30px; }
+  }
 </style>
 </head>
 <body>
@@ -12248,12 +12328,12 @@ const BED_COLOR_STOPS = {
     [0.00,  15, 100, 40],    // $3,000 — deep green
     [0.10,  40, 150, 55],    // ~$4,200
     [0.20,  90, 180, 60],    // ~$5,400
-    [0.250, 170, 210, 50],   // $6,000 — yellow-green
-    [0.333, 253, 216, 53],   // $7,000 — yellow
-    [0.42,  255, 179, 0],    // ~$8,000 — amber
+    [0.333, 170, 210, 50],   // ~$7,000 — yellow-green
+    [0.417, 253, 216, 53],   // $8,000 — yellow
+    [0.50,  255, 179, 0],    // ~$9,000 — amber
     [0.625, 255, 152, 0],    // $10,500 — orange
-    [0.750, 211, 47, 47],    // $12,000 — true red
-    [0.875, 140, 0, 0],      // ~$13,500 — dark red
+    [0.833, 211, 47, 47],    // $13,000 — true red
+    [0.917, 140, 0, 0],      // ~$14,000 — dark red
     [1.00,  100, 0, 0]       // $15,000 — darkest
   ]
 };
