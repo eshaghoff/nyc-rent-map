@@ -581,6 +581,13 @@
     <span class="control-dot" style="background: #ff1744;"></span>
     Violent Crime
   </button>
+<select id="crimeYearSelect" onchange="switchCrimeYear(this.value)" style="
+  background: rgba(0,0,0,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer;
+  margin-left: -4px; font-family: inherit;">
+  <option value="2025" selected>2025</option>
+  <option value="2024">2024</option>
+</select>
   <button class="control-btn" onclick="startAnnotation()">
     <span class="control-dot" style="background: var(--accent2);"></span>
     + Add Note
@@ -9674,11 +9681,61 @@ subwayStations.forEach(s => {
   subwayLayer.addLayer(marker);
 });
 
-// Crime overlay
-// NYPD murder data -- Murder & Non-Negl. Manslaughter by precinct (NYC Open Data, full year 2025)
-// Source: dataset 5uac-w243, updated Feb 2026. 277 total murders across 66 precincts.
-// Only precincts with >= 3 murders shown (38 precincts). Radius scaled by sqrt(count), thirds for levels.
-const crimeZones = [
+// NYPD murder data -- Murder & Non-Negl. Manslaughter by precinct (NYC Open Data)
+// 2024: 343 total murders across 71 precincts (source: dataset qgea-i56i)
+// 2025: 277 total murders across 66 precincts (source: dataset 5uac-w243)
+// Only precincts with >= 3 murders shown. Radius scaled by sqrt(count), thirds for levels.
+let crimeYear = '2025';
+const crimeZones2024 = [
+  { lat: 40.8544, lng: -73.9109, r: 1000, level: "high" },
+  { lat: 40.6755, lng: -73.9378, r: 871, level: "high" },
+  { lat: 40.828, lng: -73.9177, r: 721, level: "high" },
+  { lat: 40.8289, lng: -73.9262, r: 721, level: "high" },
+  { lat: 40.829, lng: -73.8239, r: 692, level: "high" },
+  { lat: 40.8372, lng: -73.8685, r: 692, level: "high" },
+  { lat: 40.6993, lng: -73.788, r: 692, level: "high" },
+  { lat: 40.6908, lng: -73.9362, r: 692, level: "high" },
+  { lat: 40.8671, lng: -73.8876, r: 663, level: "high" },
+  { lat: 40.6632, lng: -73.8764, r: 632, level: "high" },
+  { lat: 40.8249, lng: -73.8622, r: 600, level: "high" },
+  { lat: 40.814, lng: -73.9393, r: 565, level: "high" },
+  { lat: 40.8726, lng: -73.8615, r: 565, level: "high" },
+  { lat: 40.687, lng: -73.9395, r: 565, level: "high" },
+  { lat: 40.8291, lng: -73.9226, r: 529, level: "high" },
+  { lat: 40.7563, lng: -73.883, r: 529, level: "medium" },
+  { lat: 40.8508, lng: -73.9346, r: 489, level: "medium" },
+  { lat: 40.5876, lng: -73.9847, r: 489, level: "medium" },
+  { lat: 40.7223, lng: -73.8338, r: 489, level: "medium" },
+  { lat: 40.7817, lng: -73.9504, r: 447, level: "medium" },
+  { lat: 40.6247, lng: -73.9295, r: 447, level: "medium" },
+  { lat: 40.6439, lng: -73.9571, r: 447, level: "medium" },
+  { lat: 40.6434, lng: -73.957, r: 447, level: "medium" },
+  { lat: 40.6979, lng: -73.7863, r: 447, level: "medium" },
+  { lat: 40.7146, lng: -73.9998, r: 400, level: "medium" },
+  { lat: 40.7647, lng: -73.9706, r: 400, level: "medium" },
+  { lat: 40.8059, lng: -73.9461, r: 400, level: "medium" },
+  { lat: 40.8132, lng: -73.923, r: 400, level: "medium" },
+  { lat: 40.8392, lng: -73.9292, r: 400, level: "medium" },
+  { lat: 40.831, lng: -73.9041, r: 400, level: "medium" },
+  { lat: 40.6567, lng: -73.9565, r: 400, level: "low" },
+  { lat: 40.6658, lng: -73.912, r: 400, level: "low" },
+  { lat: 40.8223, lng: -73.8988, r: 400, level: "low" },
+  { lat: 40.761, lng: -73.833, r: 400, level: "low" },
+  { lat: 40.7136, lng: -73.9966, r: 346, level: "low" },
+  { lat: 40.758, lng: -73.9857, r: 346, level: "low" },
+  { lat: 40.8183, lng: -73.9377, r: 346, level: "low" },
+  { lat: 40.8537, lng: -73.8893, r: 346, level: "low" },
+  { lat: 40.5935, lng: -73.755, r: 346, level: "low" },
+  { lat: 40.6341, lng: -73.901, r: 346, level: "low" },
+  { lat: 40.6929, lng: -73.9868, r: 346, level: "low" },
+  { lat: 40.6622, lng: -73.9506, r: 346, level: "low" },
+  { lat: 40.7156, lng: -73.7941, r: 346, level: "low" },
+  { lat: 40.7093, lng: -73.8954, r: 346, level: "low" },
+  { lat: 40.7687, lng: -73.9282, r: 346, level: "low" },
+  { lat: 40.7875, lng: -73.8107, r: 346, level: "low" },
+  { lat: 40.5769, lng: -74.1691, r: 346, level: "low" }
+];
+const crimeZones2025 = [
   { lat: 40.6993, lng: -73.788, r: 748, level: "high" },
   { lat: 40.8671, lng: -73.8876, r: 721, level: "high" },
   { lat: 40.828, lng: -73.9177, r: 663, level: "high" },
@@ -9718,20 +9775,33 @@ const crimeZones = [
   { lat: 40.7093, lng: -73.8954, r: 346, level: "low" },
   { lat: 40.6432, lng: -74.0766, r: 346, level: "low" }
 ];
+function getCrimeZones() { return crimeYear === '2024' ? crimeZones2024 : crimeZones2025; }
 
-crimeZones.forEach(z => {
-  const fillOp = z.level === 'high' ? 0.35 : z.level === 'medium' ? 0.20 : 0.10;
-  const strokeOp = z.level === 'high' ? 0.6 : z.level === 'medium' ? 0.35 : 0.15;
-  const weight = z.level === 'high' ? 1.5 : z.level === 'medium' ? 1.0 : 0.5;
-  crimeLayer.addLayer(L.circle([z.lat, z.lng], {
-    radius: z.r,
-    fillColor: '#000000',
-    fillOpacity: fillOp,
-    color: '#000000',
-    weight: weight,
-    opacity: strokeOp
-  }));
-});
+function renderCrimeCircles() {
+  crimeLayer.clearLayers();
+  getCrimeZones().forEach(z => {
+    const fillOp = z.level === 'high' ? 0.35 : z.level === 'medium' ? 0.20 : 0.10;
+    const strokeOp = z.level === 'high' ? 0.6 : z.level === 'medium' ? 0.35 : 0.15;
+    const weight = z.level === 'high' ? 1.5 : z.level === 'medium' ? 1.0 : 0.5;
+    crimeLayer.addLayer(L.circle([z.lat, z.lng], {
+      radius: z.r,
+      fillColor: '#000000',
+      fillOpacity: fillOp,
+      color: '#000000',
+      weight: weight,
+      opacity: strokeOp
+    }));
+  });
+}
+renderCrimeCircles();
+
+function switchCrimeYear(yr) {
+  crimeYear = yr;
+  renderCrimeCircles();
+  if (!layerStates.crime) {
+    toggleLayer('crime');
+  }
+}
 
 // Initial build
 buildRentLayers('all');
