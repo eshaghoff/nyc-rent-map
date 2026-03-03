@@ -13202,8 +13202,8 @@ function updateLabelsForZoom() {
   // Min pixel distance between label centers at each zoom level
   const minDist = zoom >= 14 ? 30 : zoom >= 13 ? 60 : zoom >= 12 ? 100 : zoom >= 11 ? 160 : 220;
   const placed = [];
-  // Sort by priority (p:1 = major, p:2 = notable, p:3 = minor) so iconic neighborhoods win collisions
-  const sorted = [...currentLabelData].sort((a, b) => (a.p || 3) - (b.p || 3));
+  // Sort by priority (p:0 = iconic, p:1 = major, p:2 = notable, p:3 = minor) so notable neighborhoods win collisions
+  const sorted = [...currentLabelData].sort((a, b) => (a.p ?? 3) - (b.p ?? 3));
   sorted.forEach(n => {
     const pt = map.latLngToContainerPoint([n.lat, n.lng]);
     // Check collision with already-placed labels
