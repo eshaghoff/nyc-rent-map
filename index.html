@@ -551,7 +551,7 @@
 <div class="top-bar">
   <div>
     <div class="logo">NYC RENT <span>HEAT MAP</span></div>
-    <div class="subtitle">14,184 Market-Rate 1BR Listings &middot; Rented Sept-Dec 2025</div>
+    <div class="subtitle">10,287 Rented 1BR Listings &middot; Q4 2025 Report (Published Jan 1, 2026)</div>
     <div class="attribution">by <a href="https://x.com/sameshaghoff" target="_blank" class="twitter-link">Sam Eshaghoff</a> & <a href="https://westeggdevelopment.com" target="_blank" class="twitter-link">West Egg Development</a></div>
   </div>
   <div>
@@ -672,7 +672,7 @@
 
 <script>
 // ============================================================
-// DATA (v6): market-rate listings (Feb 2026)
+// DATA (v6): rented listings Q4 2025 (Sept-Dec 2025)
 // RS filtered: rent<$2,500 + non-$5-divisible, Manhattan<96th<$2K, <55% local median
 // Bad property types removed (multi-family, townhouse, etc). No rent capping.
 // Adaptive grid: 0.003° in Manhattan/N.Brooklyn, 0.005° elsewhere
@@ -9675,54 +9675,48 @@ subwayStations.forEach(s => {
 });
 
 // Crime overlay
-// NYPD murder data — Murder & Non-Negl. Manslaughter by precinct (NYC Open Data, YTD 2025-2026)
-// Circles placed at precinct station house locations for accurate neighborhood positioning.
-// Only precincts with >= 3 murders shown. Radius scaled by sqrt(count), thirds for levels.
+// NYPD murder data -- Murder & Non-Negl. Manslaughter by precinct (NYC Open Data, full year 2025)
+// Source: dataset 5uac-w243, updated Feb 2026. 277 total murders across 66 precincts.
+// Only precincts with >= 3 murders shown (38 precincts). Radius scaled by sqrt(count), thirds for levels.
 const crimeZones = [
-  { lat: 40.6632, lng: -73.8764, r: 900, level: "high" },
-  { lat: 40.8726, lng: -73.8615, r: 889, level: "high" },
-  { lat: 40.8537, lng: -73.8893, r: 889, level: "high" },
-  { lat: 40.8249, lng: -73.8622, r: 877, level: "high" },
-  { lat: 40.8132, lng: -73.923, r: 865, level: "high" },
-  { lat: 40.8136, lng: -73.9452, r: 865, level: "high" },
-  { lat: 40.829, lng: -73.8239, r: 853, level: "high" },
-  { lat: 40.831, lng: -73.9041, r: 853, level: "high" },
-  { lat: 40.8291, lng: -73.9226, r: 840, level: "high" },
-  { lat: 40.6567, lng: -73.9565, r: 826, level: "high" },
-  { lat: 40.687, lng: -73.9395, r: 826, level: "high" },
-  { lat: 40.8544, lng: -73.9109, r: 826, level: "high" },
-  { lat: 40.6658, lng: -73.912, r: 812, level: "high" },
-  { lat: 40.6993, lng: -73.788, r: 812, level: "high" },
-  { lat: 40.7563, lng: -73.883, r: 812, level: "medium" },
-  { lat: 40.758, lng: -73.9857, r: 812, level: "medium" },
-  { lat: 40.6939, lng: -73.919, r: 812, level: "medium" },
-  { lat: 40.6979, lng: -73.7863, r: 796, level: "medium" },
-  { lat: 40.8671, lng: -73.8876, r: 796, level: "medium" },
-  { lat: 40.8059, lng: -73.9461, r: 796, level: "medium" },
-  { lat: 40.6434, lng: -73.957, r: 779, level: "medium" },
-  { lat: 40.6622, lng: -73.9506, r: 779, level: "medium" },
-  { lat: 40.7093, lng: -73.8954, r: 779, level: "medium" },
-  { lat: 40.6755, lng: -73.9378, r: 779, level: "medium" },
-  { lat: 40.7494, lng: -73.8645, r: 779, level: "medium" },
-  { lat: 40.6247, lng: -73.9295, r: 779, level: "medium" },
-  { lat: 40.8547, lng: -73.856, r: 779, level: "medium" },
-  { lat: 40.6341, lng: -73.901, r: 779, level: "medium" },
-  { lat: 40.5812, lng: -73.965, r: 760, level: "low" },
-  { lat: 40.714, lng: -73.7398, r: 760, level: "low" },
-  { lat: 40.7146, lng: -73.9998, r: 760, level: "low" },
-  { lat: 40.5935, lng: -73.755, r: 760, level: "low" },
-  { lat: 40.669, lng: -73.828, r: 738, level: "low" },
-  { lat: 40.6908, lng: -73.9362, r: 738, level: "low" },
-  { lat: 40.6929, lng: -73.9868, r: 738, level: "low" },
-  { lat: 40.6432, lng: -74.0766, r: 738, level: "low" },
-  { lat: 40.8508, lng: -73.9346, r: 738, level: "low" },
-  { lat: 40.699, lng: -73.844, r: 738, level: "low" },
-  { lat: 40.706, lng: -73.9433, r: 738, level: "low" },
-  { lat: 40.7156, lng: -73.7941, r: 738, level: "low" },
-  { lat: 40.8185, lng: -73.9474, r: 738, level: "low" },
-  { lat: 40.7997, lng: -73.9487, r: 738, level: "low" },
-  { lat: 40.8223, lng: -73.8988, r: 738, level: "low" },
-  { lat: 40.761, lng: -73.833, r: 738, level: "low" }
+  { lat: 40.6993, lng: -73.788, r: 748, level: "high" },
+  { lat: 40.8671, lng: -73.8876, r: 721, level: "high" },
+  { lat: 40.828, lng: -73.9177, r: 663, level: "high" },
+  { lat: 40.829, lng: -73.8239, r: 663, level: "high" },
+  { lat: 40.8726, lng: -73.8615, r: 663, level: "high" },
+  { lat: 40.831, lng: -73.9041, r: 632, level: "high" },
+  { lat: 40.8289, lng: -73.9262, r: 565, level: "high" },
+  { lat: 40.8537, lng: -73.8893, r: 565, level: "high" },
+  { lat: 40.8544, lng: -73.9109, r: 565, level: "high" },
+  { lat: 40.6632, lng: -73.8764, r: 565, level: "high" },
+  { lat: 40.7817, lng: -73.9504, r: 529, level: "high" },
+  { lat: 40.8291, lng: -73.9226, r: 529, level: "high" },
+  { lat: 40.6755, lng: -73.9378, r: 529, level: "medium" },
+  { lat: 40.687, lng: -73.9395, r: 529, level: "medium" },
+  { lat: 40.706, lng: -73.9433, r: 529, level: "medium" },
+  { lat: 40.7563, lng: -73.883, r: 529, level: "medium" },
+  { lat: 40.8372, lng: -73.8685, r: 489, level: "medium" },
+  { lat: 40.7223, lng: -73.8338, r: 489, level: "medium" },
+  { lat: 40.878, lng: -73.8448, r: 447, level: "medium" },
+  { lat: 40.6439, lng: -73.9571, r: 447, level: "medium" },
+  { lat: 40.6658, lng: -73.912, r: 447, level: "medium" },
+  { lat: 40.699, lng: -73.844, r: 447, level: "medium" },
+  { lat: 40.7875, lng: -73.8107, r: 447, level: "medium" },
+  { lat: 40.7136, lng: -73.9966, r: 400, level: "medium" },
+  { lat: 40.8132, lng: -73.923, r: 400, level: "low" },
+  { lat: 40.5935, lng: -73.755, r: 400, level: "low" },
+  { lat: 40.5827, lng: -74.1518, r: 400, level: "low" },
+  { lat: 40.6567, lng: -73.9565, r: 400, level: "low" },
+  { lat: 40.6908, lng: -73.9362, r: 400, level: "low" },
+  { lat: 40.7156, lng: -73.7941, r: 400, level: "low" },
+  { lat: 40.7113, lng: -73.8185, r: 400, level: "low" },
+  { lat: 40.8059, lng: -73.9461, r: 346, level: "low" },
+  { lat: 40.8508, lng: -73.9346, r: 346, level: "low" },
+  { lat: 40.8249, lng: -73.8622, r: 346, level: "low" },
+  { lat: 40.8223, lng: -73.8988, r: 346, level: "low" },
+  { lat: 40.7494, lng: -73.8645, r: 346, level: "low" },
+  { lat: 40.7093, lng: -73.8954, r: 346, level: "low" },
+  { lat: 40.6432, lng: -74.0766, r: 346, level: "low" }
 ];
 
 crimeZones.forEach(z => {
@@ -9983,7 +9977,7 @@ function applyScenario() {
   if (subtitleEl) {
     const count = LISTING_COUNTS[activeBeds] || '—';
     const bedText = activeBeds === '3br' ? '3+BR' : activeBeds.toUpperCase();
-    subtitleEl.innerHTML = `${count} Market-Rate ${bedText} Listings &middot; Feb 2026`;
+    subtitleEl.innerHTML = count + ' Rented ' + bedText + ' Listings &middot; Q4 2025 Report (Published Jan 1, 2026)';
   }
 
   // Update stats bar
