@@ -12824,53 +12824,53 @@ const layerStates = { rent: true, labels: true, subway: false, crime: false };
 // Rent contour/isoline system — IDW grid → d3-contour → filled polygons
 // Per-bed-count color scale ranges
 const BED_RENT_RANGE = {
-  '1br': [1800, 9000],
-  '2br': [2100, 14000],
-  '3br': [3000, 25000]
+  '1br': [1800, 6900],
+  '2br': [2300, 12100],
+  '3br': [2900, 15800]
 };
 // Log-scale color stops — evenly spaced in t (0–1), log mapping in rent→t function
 // Formula: t = log(rent/min) / log(max/min)  →  rent at stop i = min × (max/min)^(i/9)
 // Format: [t, R, G, B]
 const BED_COLOR_STOPS = {
-  '1br': [  // range $1,800–$9,000, ratio 5.00×
+  '1br': [  // range $1,800–$6,900, ratio 3.83×
     [0.000,  15, 100,  40],    // $1,800 — deep green
-    [0.111,  40, 150,  55],    // $2,152 — green
-    [0.222,  90, 180,  60],    // $2,573 — light green
-    [0.333, 170, 210,  50],    // $3,077 — yellow-green
-    [0.444, 253, 216,  53],    // $3,680 — yellow
-    [0.556, 255, 179,   0],    // $4,401 — amber
-    [0.667, 255, 152,   0],    // $5,263 — orange
-    [0.778, 211,  47,  47],    // $6,293 — red
-    [0.889, 140,   0,   0],    // $7,526 — dark red
-    [1.000, 100,   0,   0]     // $9,000 — darkest
+    [0.111,  40, 150,  55],    // $2,089 — green
+    [0.222,  90, 180,  60],    // $2,426 — light green
+    [0.333, 170, 210,  50],    // $2,817 — yellow-green
+    [0.444, 253, 216,  53],    // $3,270 — yellow
+    [0.556, 255, 179,   0],    // $3,797 — amber
+    [0.667, 255, 152,   0],    // $4,408 — orange
+    [0.778, 211,  47,  47],    // $5,118 — red
+    [0.889, 140,   0,   0],    // $5,943 — dark red
+    [1.000, 100,   0,   0]     // $6,900 — darkest
   ],
-  '2br': [  // range $2,100–$14,000, ratio 6.67×
-    [0.000,  15, 100,  40],    // $2,100 — deep green
-    [0.111,  40, 150,  55],    // $2,592 — green
-    [0.222,  90, 180,  60],    // $3,201 — light green
-    [0.333, 170, 210,  50],    // $3,952 — yellow-green
-    [0.444, 253, 216,  53],    // $4,879 — yellow
-    [0.556, 255, 179,   0],    // $6,024 — amber
-    [0.667, 255, 152,   0],    // $7,438 — orange
-    [0.778, 211,  47,  47],    // $9,184 — red
-    [0.889, 140,   0,   0],    // $11,339 — dark red
-    [1.000, 100,   0,   0]     // $14,000 — darkest
+  '2br': [  // range $2,300–$12,100, ratio 5.26×
+    [0.000,  15, 100,  40],    // $2,300 — deep green
+    [0.111,  40, 150,  55],    // $2,765 — green
+    [0.222,  90, 180,  60],    // $3,326 — light green
+    [0.333, 170, 210,  50],    // $4,000 — yellow-green
+    [0.444, 253, 216,  53],    // $4,810 — yellow
+    [0.556, 255, 179,   0],    // $5,785 — amber
+    [0.667, 255, 152,   0],    // $6,957 — orange
+    [0.778, 211,  47,  47],    // $8,366 — red
+    [0.889, 140,   0,   0],    // $10,061 — dark red
+    [1.000, 100,   0,   0]     // $12,100 — darkest
   ],
-  '3br': [  // range $3,000–$25,000, ratio 8.33×
-    [0.000,  15, 100,  40],    // $3,000 — deep green
-    [0.111,  40, 150,  55],    // $3,796 — green
-    [0.222,  90, 180,  60],    // $4,805 — light green
-    [0.333, 170, 210,  50],    // $6,082 — yellow-green
-    [0.444, 253, 216,  53],    // $7,697 — yellow
-    [0.556, 255, 179,   0],    // $9,742 — amber
-    [0.667, 255, 152,   0],    // $12,331 — orange
-    [0.778, 211,  47,  47],    // $15,606 — red
-    [0.889, 140,   0,   0],    // $19,752 — dark red
-    [1.000, 100,   0,   0]     // $25,000 — darkest
+  '3br': [  // range $2,900–$15,800, ratio 5.45×
+    [0.000,  15, 100,  40],    // $2,900 — deep green
+    [0.111,  40, 150,  55],    // $3,501 — green
+    [0.222,  90, 180,  60],    // $4,226 — light green
+    [0.333, 170, 210,  50],    // $5,102 — yellow-green
+    [0.444, 253, 216,  53],    // $6,160 — yellow
+    [0.556, 255, 179,   0],    // $7,437 — amber
+    [0.667, 255, 152,   0],    // $8,979 — orange
+    [0.778, 211,  47,  47],    // $10,840 — red
+    [0.889, 140,   0,   0],    // $13,087 — dark red
+    [1.000, 100,   0,   0]     // $15,800 — darkest
   ]
 };
 let activeColorStops = BED_COLOR_STOPS['1br'];
-let RENT_MIN = 1800, RENT_MAX = 9000;
+let RENT_MIN = 1800, RENT_MAX = 6900;
 
 // Color scale: rent value → fill color (green → yellow → orange → red → dark red)
 // Log-scale mapping: more color resolution for lower rents, compressed at the top
