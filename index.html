@@ -12824,53 +12824,53 @@ const layerStates = { rent: true, labels: true, subway: false, crime: false };
 // Rent contour/isoline system — IDW grid → d3-contour → filled polygons
 // Per-bed-count color scale ranges
 const BED_RENT_RANGE = {
-  '1br': [2000, 6400],
-  '2br': [2500, 10400],
-  '3br': [3000, 14300]
+  '1br': [1800, 8000],
+  '2br': [2500, 12000],
+  '3br': [3000, 15000]
 };
 // Log-scale color stops — evenly spaced in t (0–1), log mapping in rent→t function
 // Formula: t = log(rent/min) / log(max/min)  →  rent at stop i = min × (max/min)^(i/9)
 // Format: [t, R, G, B]
 const BED_COLOR_STOPS = {
-  '1br': [  // range $2,000–$6,400, ratio 3.20×
-    [0.000,  15, 100, 40],    // $2,000 — deep green
-    [0.111,  40, 150, 55],    // $2,275 — green
-    [0.222,  90, 180, 60],    // $2,589 — light green
-    [0.333, 170, 210, 50],    // $2,947 — yellow-green
-    [0.444, 253, 216, 53],    // $3,353 — yellow
-    [0.556, 255, 179, 0],     // $3,816 — amber
-    [0.667, 255, 152, 0],     // $4,343 — orange
-    [0.778, 211, 47, 47],     // $4,942 — red
-    [0.889, 140, 0, 0],       // $5,624 — dark red
-    [1.000, 100, 0, 0]        // $6,400 — darkest
+  '1br': [  // range $1,800–$8,000, ratio 4.44×
+    [0.000,  15, 100, 40],    // $1,800 — deep green
+    [0.111,  40, 150, 55],    // $2,124
+    [0.222,  90, 180, 60],    // $2,507
+    [0.333, 170, 210, 50],    // $2,959 — yellow-green
+    [0.444, 253, 216, 53],    // $3,492 — yellow
+    [0.556, 255, 179, 0],     // $4,122 — amber
+    [0.667, 255, 152, 0],     // $4,865 — orange
+    [0.778, 211, 47, 47],     // $5,742 — red
+    [0.889, 140, 0, 0],       // $6,778 — dark red
+    [1.000, 100, 0, 0]        // $8,000 — darkest
   ],
-  '2br': [  // range $2,500–$10,400, ratio 4.16×
+  '2br': [  // range $2,500–$12,000, ratio 4.80×
     [0.000,  15, 100, 40],    // $2,500 — deep green
-    [0.111,  40, 150, 55],    // $2,929 — green
-    [0.222,  90, 180, 60],    // $3,431 — light green
-    [0.333, 170, 210, 50],    // $4,020 — yellow-green
-    [0.444, 253, 216, 53],    // $4,710 — yellow
-    [0.556, 255, 179, 0],     // $5,519 — amber
-    [0.667, 255, 152, 0],     // $6,466 — orange
-    [0.778, 211, 47, 47],     // $7,576 — red
-    [0.889, 140, 0, 0],       // $8,876 — dark red
-    [1.000, 100, 0, 0]        // $10,400 — darkest
+    [0.111,  40, 150, 55],    // $2,975
+    [0.222,  90, 180, 60],    // $3,540
+    [0.333, 170, 210, 50],    // $4,212 — yellow-green
+    [0.444, 253, 216, 53],    // $5,011 — yellow
+    [0.556, 255, 179, 0],     // $5,961 — amber
+    [0.667, 255, 152, 0],     // $7,092 — orange
+    [0.778, 211, 47, 47],     // $8,437 — red
+    [0.889, 140, 0, 0],       // $10,037 — dark red
+    [1.000, 100, 0, 0]        // $12,000 — darkest
   ],
-  '3br': [  // range $3,000–$14,300, ratio 4.77×
+  '3br': [  // range $3,000–$15,000, ratio 5.00×
     [0.000,  15, 100, 40],    // $3,000 — deep green
-    [0.111,  40, 150, 55],    // $3,568 — green
-    [0.222,  90, 180, 60],    // $4,244 — light green
-    [0.333, 170, 210, 50],    // $5,048 — yellow-green
-    [0.444, 253, 216, 53],    // $6,005 — yellow
-    [0.556, 255, 179, 0],     // $7,143 — amber
-    [0.667, 255, 152, 0],     // $8,496 — orange
-    [0.778, 211, 47, 47],     // $10,106 — red
-    [0.889, 140, 0, 0],       // $12,022 — dark red
-    [1.000, 100, 0, 0]        // $14,300 — darkest
+    [0.111,  40, 150, 55],    // $3,601
+    [0.222,  90, 180, 60],    // $4,323
+    [0.333, 170, 210, 50],    // $5,189 — yellow-green
+    [0.444, 253, 216, 53],    // $6,229 — yellow
+    [0.556, 255, 179, 0],     // $7,478 — amber
+    [0.667, 255, 152, 0],     // $8,978 — orange
+    [0.778, 211, 47, 47],     // $10,778 — red
+    [0.889, 140, 0, 0],       // $12,938 — dark red
+    [1.000, 100, 0, 0]        // $15,000 — darkest
   ]
 };
 let activeColorStops = BED_COLOR_STOPS['1br'];
-let RENT_MIN = 2000, RENT_MAX = 6400;
+let RENT_MIN = 1800, RENT_MAX = 8000;
 
 // Color scale: rent value → fill color (green → yellow → orange → red → dark red)
 // Log-scale mapping: more color resolution for lower rents, compressed at the top
