@@ -551,7 +551,7 @@
 <div class="top-bar">
   <div>
     <div class="logo">NYC RENT <span>HEAT MAP</span></div>
-    <div class="subtitle">10,287 Rented 1BR Listings &middot; Q4 2025 Report (Published Jan 1, 2026)</div>
+    <div class="subtitle">10,287 Rented Market-Rate 1BR Listings &middot; Q4 2025 Report (Published Jan 1, 2026)</div>
     <div class="attribution">by <a href="https://x.com/sameshaghoff" target="_blank" class="twitter-link">Sam Eshaghoff</a> & <a href="https://westeggdevelopment.com" target="_blank" class="twitter-link">West Egg Development</a></div>
   </div>
   <div>
@@ -10047,7 +10047,7 @@ function applyScenario() {
   if (subtitleEl) {
     const count = LISTING_COUNTS[activeBeds] || '—';
     const bedText = activeBeds === '3br' ? '3+BR' : activeBeds.toUpperCase();
-    subtitleEl.innerHTML = count + ' Rented ' + bedText + ' Listings &middot; Q4 2025 Report (Published Jan 1, 2026)';
+    subtitleEl.innerHTML = count + ' Rented Market-Rate ' + bedText + ' Listings &middot; Q4 2025 Report (Published Jan 1, 2026)';
   }
 
   // Update stats bar
