@@ -12828,52 +12828,54 @@ const BED_RENT_RANGE = {
   '2br': [2500, 12000],
   '3br': [3000, 15000]
 };
-// Per-bed color stop positions (proportional 0–1 within each bed's range)
-// Format: [t, R, G, B] — same colors, different breakpoints per bed count
+// Log-scale color stops — evenly spaced in t (0–1), log mapping in rent→t function
+// Formula: t = log(rent/min) / log(max/min)  →  rent at stop i = min × (max/min)^(i/9)
+// Format: [t, R, G, B]
 const BED_COLOR_STOPS = {
-  '1br': [
-    [0.00,  15, 100, 40],    // $1,800 — deep green
-    [0.13,  40, 150, 55],    // ~$2,600
-    [0.24,  90, 180, 60],    // ~$3,300
-    [0.37,  170, 210, 50],   // ~$4,100 — yellow-green
-    [0.403, 253, 216, 53],   // $4,300 — yellow
-    [0.50,  255, 179, 0],    // ~$4,900 — amber
-    [0.565, 255, 152, 0],    // ~$5,300 — orange
-    [0.677, 211, 47, 47],    // $6,000 — red
-    [0.839, 140, 0, 0],      // $7,000 — dark red
-    [1.00,  100, 0, 0]       // $8,000 — darkest
+  '1br': [  // range $1,800–$8,000, ratio 4.44×
+    [0.000,  15, 100, 40],    // $1,800 — deep green
+    [0.111,  40, 150, 55],    // $2,124
+    [0.222,  90, 180, 60],    // $2,507
+    [0.333, 170, 210, 50],    // $2,959 — yellow-green
+    [0.444, 253, 216, 53],    // $3,492 — yellow
+    [0.556, 255, 179, 0],     // $4,122 — amber
+    [0.667, 255, 152, 0],     // $4,865 — orange
+    [0.778, 211, 47, 47],     // $5,742 — red
+    [0.889, 140, 0, 0],       // $6,778 — dark red
+    [1.000, 100, 0, 0]        // $8,000 — darkest
   ],
-  '2br': [
-    [0.00,  15, 100, 40],    // $2,500 — deep green
-    [0.11,  40, 150, 55],    // ~$3,550
-    [0.20,  90, 180, 60],    // ~$4,400
-    [0.32,  170, 210, 50],   // ~$5,550 — yellow-green
-    [0.37,  253, 216, 53],   // ~$6,000 — yellow
-    [0.47,  255, 179, 0],    // ~$7,000 — amber
-    [0.53,  255, 152, 0],    // ~$7,550 — orange
-    [0.63,  211, 47, 47],    // ~$8,500 — red
-    [0.82,  140, 0, 0],      // ~$10,300 — dark red
-    [1.00,  100, 0, 0]       // $12,000 — darkest
+  '2br': [  // range $2,500–$12,000, ratio 4.80×
+    [0.000,  15, 100, 40],    // $2,500 — deep green
+    [0.111,  40, 150, 55],    // $2,975
+    [0.222,  90, 180, 60],    // $3,540
+    [0.333, 170, 210, 50],    // $4,212 — yellow-green
+    [0.444, 253, 216, 53],    // $5,011 — yellow
+    [0.556, 255, 179, 0],     // $5,961 — amber
+    [0.667, 255, 152, 0],     // $7,092 — orange
+    [0.778, 211, 47, 47],     // $8,437 — red
+    [0.889, 140, 0, 0],       // $10,037 — dark red
+    [1.000, 100, 0, 0]        // $12,000 — darkest
   ],
-  '3br': [
-    [0.00,  15, 100, 40],    // $3,000 — deep green
-    [0.10,  40, 150, 55],    // ~$4,200
-    [0.20,  90, 180, 60],    // ~$5,400
-    [0.333, 170, 210, 50],   // ~$7,000 — yellow-green
-    [0.417, 253, 216, 53],   // $8,000 — yellow
-    [0.50,  255, 179, 0],    // ~$9,000 — amber
-    [0.625, 255, 152, 0],    // $10,500 — orange
-    [0.833, 211, 47, 47],    // $13,000 — true red
-    [0.917, 140, 0, 0],      // ~$14,000 — dark red
-    [1.00,  100, 0, 0]       // $15,000 — darkest
+  '3br': [  // range $3,000–$15,000, ratio 5.00×
+    [0.000,  15, 100, 40],    // $3,000 — deep green
+    [0.111,  40, 150, 55],    // $3,601
+    [0.222,  90, 180, 60],    // $4,323
+    [0.333, 170, 210, 50],    // $5,189 — yellow-green
+    [0.444, 253, 216, 53],    // $6,229 — yellow
+    [0.556, 255, 179, 0],     // $7,478 — amber
+    [0.667, 255, 152, 0],     // $8,978 — orange
+    [0.778, 211, 47, 47],     // $10,778 — red
+    [0.889, 140, 0, 0],       // $12,938 — dark red
+    [1.000, 100, 0, 0]        // $15,000 — darkest
   ]
 };
 let activeColorStops = BED_COLOR_STOPS['1br'];
 let RENT_MIN = 1800, RENT_MAX = 8000;
 
 // Color scale: rent value → fill color (green → yellow → orange → red → dark red)
+// Log-scale mapping: more color resolution for lower rents, compressed at the top
 function rentColor(rent) {
-  const t = Math.max(0, Math.min(1, (rent - RENT_MIN) / (RENT_MAX - RENT_MIN)));
+  const t = Math.max(0, Math.min(1, Math.log(Math.max(rent, RENT_MIN) / RENT_MIN) / Math.log(RENT_MAX / RENT_MIN)));
   // Use active bed-count color stops
   const cs = activeColorStops;
   for (let i = 0; i < cs.length - 1; i++) {
@@ -13005,7 +13007,7 @@ function buildContourLayer(data, rentMin, rentMax) {
   const ctx = canvas.getContext('2d');
   const imgData = ctx.createImageData(W, H);
   const px = imgData.data;
-  const RENT_RANGE = rentMax - rentMin;
+  const LOG_RENT_RATIO = Math.log(rentMax / rentMin); // log-scale mapping
   // Unified IDW: single pass with adaptive power based on local density
   // Wider radius ensures smooth gradients even in sparse areas (SI, Bronx, East BK)
   const SEARCH_RADIUS = 10;  // ~6km — wide enough for sparse areas
@@ -13053,7 +13055,7 @@ function buildContourLayer(data, rentMin, rentMax) {
       }
 
       const rent = den > 0 ? num / den : rentMin;
-      const ti = Math.max(0, Math.min(255, Math.round((rent - rentMin) / RENT_RANGE * 255)));
+      const ti = Math.max(0, Math.min(255, Math.round(Math.log(Math.max(rent, rentMin) / rentMin) / LOG_RENT_RATIO * 255)));
       // Distance-based fade: full opacity near data, faint floor far from data.
       // Squared-cosine falloff with min floor so sparse areas (SI) stay faintly visible.
       const minDist = Math.sqrt(minDist2);
